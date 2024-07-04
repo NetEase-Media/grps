@@ -43,7 +43,9 @@ void TorchModelInferer::Init(const std::string& path, const std::string& device,
       throw InfererException("Invalid inp_device: " + inp_device +
                              ", should be cpu, cuda, gpu, cuda:[num] or gpu:[num]");
     }
-    if (std::regex_match(inp_device, std::regex("^gpu:\\d+$"))) {
+    if (inp_device == "gpu") {
+      inp_device = "cuda:0";
+    } else if (std::regex_match(inp_device, std::regex("^gpu:\\d+$"))) {
       inp_device = "cuda:" + inp_device.substr(4);
     }
     inp_dev_ = torch::Device(inp_device);
