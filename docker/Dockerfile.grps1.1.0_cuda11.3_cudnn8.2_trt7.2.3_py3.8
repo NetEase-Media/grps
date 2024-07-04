@@ -1,0 +1,74 @@
+# copyright : Copyright 2022 netease. All rights reserved.
+# author    : zhaochaochao@corp.netease.com
+# date      : 2024-06-20
+# brief     : Build the grps1.1.0 docker image with cuda11.3 + cudnn8.2 + trt7.2.3 + py3.8
+
+FROM nvcr.io/nvidia/tensorrt:21.06-py3
+LABEL version="1.1.0"
+
+WORKDIR /root/
+
+ENV TMP=/tmp
+ENV CUDA_ROOT=/usr/local/cuda
+ENV LD_LIBRARY_PATH=/usr/local/cuda/targets/x86_64-linux/lib/:$LD_LIBRARY_PATH
+
+RUN apt-get update -yq && \
+    apt-get install -yq vim tree wget figlet lolcat git && \
+    apt-get install -yq make automake bison flex libtool pkg-config zip curl lsof build-essential && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# cmake-3.18.5
+RUN rm -rf /usr/local/bin/cmake && \
+    wget https://github.com/Kitware/CMake/releases/download/v3.18.5/cmake-3.18.5-Linux-x86_64.sh && \
+    bash ./cmake-3.18.5-Linux-x86_64.sh --prefix=/usr/ --skip-license && \
+    rm -rf ./cmake-3.18.5-Linux-x86_64.sh
+
+# install protobuf-3.9.2
+RUN wget https://github.com/protocolbuffers/protobuf/archive/refs/tags/v3.9.2.tar.gz && \
+    tar -xvf v3.9.2.tar.gz && \
+    cd protobuf-3.9.2 && \
+    ./autogen.sh && \
+    ./configure --prefix=/usr/local CXXFLAGS=-fPIC CFLAGS=-fPIC && \
+    autoreconf -f -i && \
+    make clean && \
+    make _GLIBCXX_USE_CXX11_ABI=1 -j12 && \
+    make install && \
+    make clean && \
+    cd - && \
+    rm -rf protobuf-3.9.2 v3.9.2.tar.gz
+
+# prepare libtensorrt
+RUN mkdir -p /usr/local/libtensorrt/include && \
+    mkdir -p /usr/local/libtensorrt/lib && \
+    ln -s /usr/include/x86_64-linux-gnu/Nv* /usr/local/libtensorrt/include/ && \
+    ln -s /usr/lib/x86_64-linux-gnu/libnv* /usr/local/libtensorrt/lib/
+
+# setup timezone
+ENV TZ=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+RUN apt update
+RUN apt install -y tzdata
+
+# install grps
+ENV LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH
+ENV LIB_TRT_PATH=/usr/local/libtensorrt
+ADD deps.tar.gz /tmp/
+RUN cd /tmp/deps/ && \
+    bash install.sh 1 1 0 && \
+    rm -rf /tmp/deps
+ADD grps.tar.gz /tmp/
+RUN cd /tmp/grps && \
+    echo "cuda_enable=1" > .config && \
+    echo "py_enable=1" >> .config; \
+    echo "cpp_enable=1" >> .config; \
+    echo "cpp_trt_enable=1" >> .config && echo "libtensorrt_path=$LIB_TRT_PATH" >> .config; \
+    bash grps_install.sh --skip_deps && \
+    cd - && \
+    rm -rf /tmp/grps && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+ENV GRPST_HOME=/usr/local/grpst
+ENV PATH=$PATH:$GRPST_HOME
+
+RUN echo "figlet grps | /usr/games/lolcat -p 1" >> /etc/bash.bashrc

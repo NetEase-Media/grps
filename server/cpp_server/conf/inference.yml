@@ -1,0 +1,27 @@
+models:
+  - name: your_model
+    version: 1.0.0
+    device: cuda # device of model inferer. like `cpu`, `cuda`(==`cuda:0`), `gpu`(==`cuda:0`), `cuda:0`, `gpu:0`, `original`(original device specified when exported model).
+    inp_device: # when `inferer_type` is `torch` and `device` is `original`, should specify device of model inferer input.
+    inferer_type: customized # only support `torch` (torch script model format), `tensorflow` (saved model format), `tensorrt` (tensorrt engine) or `customized` now.
+    inferer_name: your_inferer # customized model inferer name that has registered in src/customized_inferer.h. Not none when inferer_type is `customized`.
+    inferer_path: # path of model inferer.
+    inferer_args: # more args of model inferer.
+      customized_op_paths: # customized op paths.
+      #- /path/to/your/customized_op.so
+    converter_type: customized # only support `torch` (torch tensor converter), `tensorflow` (tf tensor converter), `tensorrt` (tensorrt tensor converter), `customized`  or `none`(no converter mode) now.
+    converter_name: your_converter # converter name that has registered in src/customized_converter.h. Not none when converter_type is `customized`.
+    converter_path: # path of converter.
+    converter_args: # more args of converter.
+    batching: # Batching config.
+      type: none # `none`, `dynamic`.
+      max_batch_size: 16 # Maximum batch size.
+      batch_timeout_us: 1000 # Maximum waiting time for batching in milliseconds.
+
+dag:
+  type: sequential # only support `sequential` now.
+  name: your_dag # dag name.
+  nodes: # sequential mode will run node in the order of nodes.
+    - name: node-1
+      type: model # only support `model` now.
+      model: your_model-1.0.0  # model(name-version format) that has been declared in models.

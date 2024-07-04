@@ -1,0 +1,11 @@
+Flask>=2.2.5
+gunicorn>=21.2.0
+grpcio>=1.41.0
+numpy>=1.18.5
+protobuf>=3.20.3, <4.0.0
+PyYAML>=6.0.1
+Requests>=2.31.0
+setuptools>=68.0.0
+APScheduler>=3.10.4
+nest_asyncio>=1.5.8
+pynvml>=11.5.0

@@ -1,0 +1,24 @@
+# Interface config.
+interface:
+  framework: http+grpc # `http`, `http+grpc`, `http+brpc`(brpc for better performance, but not support streaming predict).
+  host: 0.0.0.0
+  port: 7080,7081 # http port, grpc port.
+  #customized_predict_http: # customized predict http config. If you want to enable it, please uncomment this section.
+  #  path: /custom_predict # customized predict http path.
+  #  customized_body: true # whether to use customized predict http body. If true, user should parse request and build response themselves.
+
+max_connections: 1000 # Maximum number of concurrent connections.
+max_concurrency: 32 # Maximum parallel request limit; requests exceeding it will be queued.
+
+# Gpu monitor config(Optional). Include gpu utilization and gpu memory monitor. If you don't need it, just comment it.
+gpu:
+  devices: [0] # Devices will be monitored.
+  mem_manager_type: none # `torch`, `tensorflow` or `none`. If not none, uncomment following configs to enable gpu memory manager.
+  #mem_limit_mib: 4096 # gpu memory limit with MiB unit, -1 means no limit.
+  #mem_gc_enable: false # If enable gpu memory gc.
+  #mem_gc_interval: 60 # Interval(s) of memery garbage collection.
+
+# Log config.
+log:
+  log_dir: ./logs # Log dir. Will be subdir of deploy path if is relative path.
+  log_backup_count: 7 # Number of log files to keep. One log file per day.

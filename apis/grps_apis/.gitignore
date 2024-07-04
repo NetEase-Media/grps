@@ -1,0 +1,11 @@
+# ide
+.idea
+
+# logs
+logs
+
+# python
+**/__pycache__/
+
+# build
+build

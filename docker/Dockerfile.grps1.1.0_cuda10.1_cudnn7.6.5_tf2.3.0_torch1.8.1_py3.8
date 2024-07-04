@@ -1,0 +1,170 @@
+# copyright : Copyright 2022 netease. All rights reserved.
+# author    : zhaochaochao@corp.netease.com
+# date      : 2023-09-11
+# brief     : Build the grps1.1.0 docker image with cuda10.1 + cudnn7.6.5 + tensorflow2.3.0 + torch1.8.1 + py3.8
+
+FROM nvcr.io/nvidia/cuda:10.1-cudnn7-devel-ubuntu18.04
+LABEL version="1.1.0"
+
+ARG PY_ENABLE=1
+ARG CPP_ENABLE=1
+ARG TORCH_ENABLE=1
+ARG TF_ENABLE=1
+
+WORKDIR /root/
+
+ENV TMP=/tmp
+ENV CUDA_ROOT=/usr/local/cuda
+ENV LD_LIBRARY_PATH=/usr/local/cuda/targets/x86_64-linux/lib/:$LD_LIBRARY_PATH
+
+RUN apt-get update -yq && \
+    apt-get install -yq vim tree wget figlet lolcat git && \
+    apt-get install -yq make automake bison flex libtool pkg-config zip curl lsof build-essential && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# python3.8
+RUN apt-get update -yq && \
+    apt install -y python3.8 python3.8-distutils python3.8-dev && \
+    rm -rf /usr/bin/python3 && \
+    ln /usr/bin/python3.8 /usr/bin/python3 && \
+    ln /usr/bin/python3.8 /usr/bin/python && \
+    wget https://bootstrap.pypa.io/get-pip.py && \
+    python3 get-pip.py && \
+    rm -rf get-pip.py
+
+# cmake-3.18.5
+RUN wget https://github.com/Kitware/CMake/releases/download/v3.18.5/cmake-3.18.5-Linux-x86_64.sh && \
+    bash ./cmake-3.18.5-Linux-x86_64.sh --prefix=/usr/ --skip-license && \
+    rm -rf ./cmake-3.18.5-Linux-x86_64.sh
+
+# NOTE: protobuf should be compatible with both libtensorflow and brpc-1.6.0 those are depended by grps server.
+# install protobuf-3.9.2
+RUN wget https://github.com/protocolbuffers/protobuf/archive/refs/tags/v3.9.2.tar.gz && \
+    tar -xvf v3.9.2.tar.gz && \
+    cd protobuf-3.9.2 && \
+    ./autogen.sh && \
+    ./configure --prefix=/usr/local CXXFLAGS=-fPIC CFLAGS=-fPIC && \
+    autoreconf -f -i && \
+    make clean && \
+    make _GLIBCXX_USE_CXX11_ABI=1 -j12 && \
+    make install && \
+    make clean && \
+    cd - && \
+    rm -rf protobuf-3.9.2 v3.9.2.tar.gz
+
+# bazel used to compile libtensorflow
+RUN if [ $TF_ENABLE -eq 1 -a $CPP_ENABLE -eq 1 ]; then \
+        wget https://github.com/bazelbuild/bazelisk/releases/download/v1.18.0/bazelisk-linux-amd64 && \
+        mv bazelisk-linux-amd64 /usr/local/bin/bazel && \
+        chmod a+x /usr/local/bin/bazel; \
+    fi
+
+# build and install libtensorflow from source
+RUN if [ $TF_ENABLE -eq 1 -a $CPP_ENABLE -eq 1 ]; then \
+        wget https://github.com/tensorflow/tensorflow/archive/refs/tags/v2.3.0.tar.gz && \
+        tar -xvf v2.3.0.tar.gz && \
+        cd tensorflow-2.3.0 && \
+        pip3 install numpy && \
+        echo 'build --action_env PYTHON_BIN_PATH="/usr/bin/python3"' >> .tf_configure.bazelrc && \
+        echo 'build --action_env PYTHON_LIB_PATH="/usr/local/lib/python3.8/dist-packages"' >> .tf_configure.bazelrc && \
+        echo 'build --python_path="/usr/bin/python3"' >> .tf_configure.bazelrc && \
+        echo 'build --config=xla' >> .tf_configure.bazelrc && \
+        echo 'build --action_env CUDA_TOOLKIT_PATH="/usr/local/cuda-10.1"' >> .tf_configure.bazelrc && \
+        echo 'build --action_env TF_CUDA_COMPUTE_CAPABILITIES="3.5,5.2,6.0,6.1,7.0,7.5"' >> .tf_configure.bazelrc && \
+        echo 'build --action_env LD_LIBRARY_PATH="/usr/local/cuda/targets/x86_64-linux/lib/:/usr/local/lib/:/usr/local/nvidia/lib:/usr/local/nvidia/lib64"' >> .tf_configure.bazelrc && \
+        echo 'build --action_env GCC_HOST_COMPILER_PATH="/usr/bin/x86_64-linux-gnu-gcc-7"' >> .tf_configure.bazelrc && \
+        echo 'build --config=cuda' >> .tf_configure.bazelrc && \
+        echo 'build:opt --copt=-Wno-sign-compare' >> .tf_configure.bazelrc && \
+        echo 'build:opt --host_copt=-Wno-sign-compare' >> .tf_configure.bazelrc && \
+        echo 'build:opt --define with_default_optimizations=true' >> .tf_configure.bazelrc && \
+        echo 'test --flaky_test_attempts=3' >> .tf_configure.bazelrc && \
+        echo 'test --test_size_filters=small,medium' >> .tf_configure.bazelrc && \
+        echo 'test --test_env=LD_LIBRARY_PATH' >> .tf_configure.bazelrc && \
+        echo 'test:v1 --test_tag_filters=-benchmark-test,-no_oss,-no_gpu,-oss_serial' >> .tf_configure.bazelrc && \
+        echo 'test:v1 --build_tag_filters=-benchmark-test,-no_oss,-no_gpu' >> .tf_configure.bazelrc && \
+        echo 'test:v2 --test_tag_filters=-benchmark-test,-no_oss,-no_gpu,-oss_serial,-v1only' >> .tf_configure.bazelrc && \
+        echo 'test:v2 --build_tag_filters=-benchmark-test,-no_oss,-no_gpu,-v1only' >> .tf_configure.bazelrc && \
+        echo 'build --action_env TF_CONFIGURE_IOS="0"' >> .tf_configure.bazelrc && \
+        bazel build --color=yes --curses=yes --output_filter=DONT_MATCH_ANYTHING --config=cuda  -c opt --copt=-msse4.1 \
+        --copt=-msse4.2 --copt=-mavx --copt=-mavx2 --copt=-mfma --cxxopt="-fexceptions" --copt="-fexceptions" \
+        --copt=-mfpmath=both --copt=-O3 --define=grpc_no_ares=true //tensorflow:libtensorflow_cc.so --verbose_failures --jobs=12 && \
+        bazel build --color=yes --config=opt tensorflow:install_headers --jobs=12 && \
+        cd .. && \
+        mkdir -p /usr/local/libtensorflow/lib && \
+        cp -r tensorflow-2.3.0/bazel-bin/tensorflow/include /usr/local/libtensorflow/include && \
+        cp -d tensorflow-2.3.0/bazel-bin/tensorflow/libtensorflow*.so.* /usr/local/libtensorflow/lib/ && \
+        cd /usr/local/libtensorflow/lib && \
+        ln -s libtensorflow_cc.so.2 libtensorflow_cc.so && \
+        ln -s libtensorflow_framework.so.2 libtensorflow_framework.so && \
+        cd - && \
+        rm -rf tensorflow-2.3.0 v2.3.0.tar.gz .cache; \
+    fi
+
+# install tensorflow
+RUN if [ $TF_ENABLE -eq 1 -a $PY_ENABLE -eq 1 ]; then \
+        pip3 install tensorflow-gpu==2.3.0 && \
+        rm -rf .cache; \
+    fi
+
+# install libtorch
+RUN if [ $TORCH_ENABLE -eq 1 -a $CPP_ENABLE -eq 1 ]; then \
+        wget https://download.pytorch.org/libtorch/cu101/libtorch-cxx11-abi-shared-with-deps-1.8.1%2Bcu101.zip && \
+        unzip libtorch-cxx11-abi-shared-with-deps-1.8.1+cu101.zip && \
+        mv libtorch /usr/local/libtorch && \
+        rm -rf libtorch-cxx11-abi-shared-with-deps-1.8.1+cu101.zip; \
+    fi
+
+# install pytorch
+RUN if [ $TORCH_ENABLE -eq 1 -a $PY_ENABLE -eq 1 ]; then \
+        wget https://download.pytorch.org/whl/cu101/torch-1.8.1%2Bcu101-cp38-cp38-linux_x86_64.whl && \
+        wget https://download.pytorch.org/whl/cu101/torchvision-0.9.1%2Bcu101-cp38-cp38-linux_x86_64.whl && \
+        wget https://download.pytorch.org/whl/torchaudio-0.8.1-cp38-cp38-linux_x86_64.whl && \
+        pip3 install --upgrade pip && \
+        pip3 install torch-1.8.1+cu101-cp38-cp38-linux_x86_64.whl && \
+        pip3 install torchvision-0.9.1+cu101-cp38-cp38-linux_x86_64.whl && \
+        pip3 install torchaudio-0.8.1-cp38-cp38-linux_x86_64.whl && \
+        rm -rf torch-1.8.1+cu101-cp38-cp38-linux_x86_64.whl && \
+        rm -rf torchvision-0.9.1+cu101-cp38-cp38-linux_x86_64.whl && \
+        rm -rf torchaudio-0.8.1-cp38-cp38-linux_x86_64.whl && \
+        rm -rf .cache; \
+    fi
+
+# setup timezone
+ENV TZ=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+RUN apt update
+RUN apt install -y tzdata
+
+# install grps
+ENV LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH
+ENV LIB_TF_PATH=/usr/local/libtensorflow
+ENV LIB_TORCH_PATH=/usr/local/libtorch
+ADD deps.tar.gz /tmp/
+RUN cd /tmp/deps/ && \
+    bash install.sh $CPP_ENABLE 1 0 && \
+    rm -rf /tmp/deps
+ADD grps.tar.gz /tmp/
+RUN cd /tmp/grps && \
+    echo "cuda_enable=1" > .config && \
+    if [ $PY_ENABLE -eq 1 ]; then \
+        echo "py_enable=1" >> .config; \
+    fi && \
+    if [ $CPP_ENABLE -eq 1 ]; then \
+        echo "cpp_enable=1" >> .config; \
+    fi && \
+    if [ $CPP_ENABLE -eq 1 -a $TORCH_ENABLE -eq 1 ]; then \
+        echo "cpp_torch_enable=1" >> .config && echo "libtorch_path=$LIB_TORCH_PATH" >> .config; \
+    fi && \
+    if [ $CPP_ENABLE -eq 1 -a $TF_ENABLE -eq 1 ]; then \
+        echo "cpp_tf_enable=1" >> .config && echo "libtensorflow_path=$LIB_TF_PATH" >> .config; \
+    fi && \
+    bash grps_install.sh --skip_deps && \
+    cd - && \
+    rm -rf /tmp/grps && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+ENV GRPST_HOME=/usr/local/grpst
+ENV PATH=$PATH:$GRPST_HOME
+
+RUN echo "figlet grps | /usr/games/lolcat -p 1" >> /etc/bash.bashrc

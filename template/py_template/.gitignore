@@ -1,0 +1,8 @@
+# ide
+.idea
+
+# python
+**/__pycache__/
+
+# server generated files
+logs

@@ -1,0 +1,86 @@
+# copyright : Copyright 2022 netease. All rights reserved.
+# author    : zhaochaochao@corp.netease.com
+# date      : 2023-09-11
+# brief     : Build the grps_client 1.1.0
+
+FROM ubuntu:18.04
+LABEL version="1.1.0"
+
+WORKDIR /root/
+
+ENV TMP=/tmp
+
+RUN apt-get update -yq && \
+    apt-get install -yq vim tree wget figlet lolcat git && \
+    apt-get install -yq make automake bison flex libtool pkg-config zip curl lsof build-essential locales && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# python3.7
+RUN apt-get update -yq && \
+    apt install -y python3.7 python3.7-distutils python3.7-dev && \
+    rm -rf /usr/bin/python3 && \
+    ln /usr/bin/python3.7 /usr/bin/python3 && \
+    ln /usr/bin/python3.7 /usr/bin/python && \
+    wget https://bootstrap.pypa.io/pip/3.7/get-pip.py && \
+    python3 get-pip.py && \
+    rm -rf get-pip.py
+
+# cmake-3.18.5
+RUN wget https://github.com/Kitware/CMake/releases/download/v3.18.5/cmake-3.18.5-Linux-x86_64.sh && \
+    bash ./cmake-3.18.5-Linux-x86_64.sh --prefix=/usr/ --skip-license && \
+    rm -rf ./cmake-3.18.5-Linux-x86_64.sh
+
+# install protobuf-3.21.12
+RUN wget https://github.com/protocolbuffers/protobuf/archive/refs/tags/v3.21.12.tar.gz && \
+    tar -xvf v3.21.12.tar.gz && \
+    mkdir protobuf-3.21.12/build && \
+    cd protobuf-3.21.12/build && \
+    cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-fPIC" -DCMAKE_C_FLAGS="-fPIC" -Dprotobuf_BUILD_TESTS=OFF .. && \
+    make -j12 && \
+    make install && \
+    cd ../../ && \
+    rm -rf protobuf-3.21.12 v3.21.12.tar.gz
+
+# setup timezone
+ENV TZ=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+RUN apt update
+RUN apt install -y tzdata
+
+# setup zh_CN.UTF-8
+RUN locale-gen zh_CN.UTF-8
+
+# install maven
+RUN wget https://archive.apache.org/dist/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz && \
+    tar -xvzf apache-maven-3.6.3-bin.tar.gz && \
+    mv apache-maven-3.6.3 /usr/local/ && \
+    rm -rf apache-maven-3.6.3-bin.tar.gz
+ENV PATH="/usr/local/apache-maven-3.6.3/bin:${PATH}"
+
+# install java
+RUN wget https://corretto.aws/downloads/resources/8.382.05.1/amazon-corretto-8.382.05.1-linux-x64.tar.gz && \
+    tar -xvzf amazon-corretto-8.382.05.1-linux-x64.tar.gz && \
+    mv amazon-corretto-8.382.05.1-linux-x64 /usr/local/ && \
+    rm -rf amazon-corretto-8.382.05.1-linux-x64.tar.gz && \
+    rm -rf /usr/local/amazon-corretto-8.382.05.1-linux-x64/javafx-src.zip && \
+    rm -rf /usr/local/amazon-corretto-8.382.05.1-linux-x64/src.zip
+ENV JAVA_HOME="/usr/local/amazon-corretto-8.382.05.1-linux-x64"
+ENV PATH="${JAVA_HOME}/bin:${PATH}"
+
+# install grps client
+ENV LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH
+ADD deps.tar.gz /tmp/
+RUN cd /tmp/deps/ && \
+    bash install.sh 1 1 1 && \
+    rm -rf /tmp/deps
+ADD client.tar.gz /tmp/
+RUN cd /tmp/client && \
+    bash -c "source grps_client_env.sh" && \
+    bash grps_client_install.sh --skip_deps && \
+    cd - && \
+    rm -rf /tmp/client && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN echo "figlet grps_client | /usr/games/lolcat -p 1" >> /etc/bash.bashrc

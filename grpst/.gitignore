@@ -1,0 +1,12 @@
+# ide
+.idea
+
+# python cache
+**__pycache__**
+
+# Mac
+.DS_Store
+
+.config
+
+releases/*.tar

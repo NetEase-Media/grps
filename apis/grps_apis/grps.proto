@@ -1,0 +1,93 @@
+syntax = "proto3";
+
+package grps.protos.v1;
+
+option cc_enable_arenas = true;
+option cc_generic_services = false;
+option java_package = "io.grps.protos";
+option java_outer_classname = "GrpsProtos";
+
+enum DataType {
+  DT_INVALID = 0;
+  DT_UINT8 = 1; // byte
+  DT_INT8 = 2; // char
+  DT_INT16 = 3; // short
+  DT_INT32 = 4; // int
+  DT_INT64 = 5; // long
+  DT_FLOAT16 = 6; // half
+  DT_FLOAT32 = 7; // float
+  DT_FLOAT64 = 8; // double
+  DT_STRING = 9; // string
+}
+
+message GenericTensor {
+  string name = 1;
+  DataType dtype = 2;
+  repeated uint32 shape = 3 [packed = true];
+
+  // flatten data, row-major order to save multi-dimensional array data.
+  repeated uint32 flat_uint8 = 4 [packed = true];
+  repeated int32 flat_int8 = 5 [packed = true];
+  repeated int32 flat_int16 = 6 [packed = true];
+  repeated int32 flat_int32 = 7 [packed = true];
+  repeated int64 flat_int64 = 8 [packed = true];
+  repeated float flat_float16 = 9 [packed = true];
+  repeated float flat_float32 = 10 [packed = true];
+  repeated double flat_float64 = 11 [packed = true];
+  repeated string flat_string = 12;
+}
+
+// Generic tensor data
+message GenericTensorData {
+  repeated GenericTensor tensors = 1;
+}
+
+// Multi-dimensional array data to represent gtensors, only used when http request and one DT_FLOAT32 tensor
+message NDArrayData {}
+
+// Generic map data
+message GenericMapData {
+  map<string, string> s_s = 1;
+  map<string, bytes> s_b = 2; // If used in http json request or json response, the bytes data should be encoded by base64 when transferring. Grps server will automatically encode and decode.
+  map<string, int32> s_i32 = 3;
+  map<string, int64> s_i64 = 4;
+  map<string, float> s_f = 5;
+  map<string, double> s_d = 6;
+}
+
+message GrpsMessage {
+  Status status = 1; // Not need when request message
+  string model = 2; // Select model(with `name-version` format) to predict. If not define, will use default model dag (defined in inference.yml) to predict.
+  oneof data_oneof {
+    bytes bin_data = 3;
+    string str_data = 4;
+    GenericTensorData gtensors = 5; // Generic tensor data
+    NDArrayData ndarray = 6; // Multi-dimensional array data to represent gtensors, only used when http json request and one DT_FLOAT32 tensor
+    GenericMapData gmap = 7; // Generic map data
+  }
+}
+
+message Status {
+  enum StatusFlag {
+    UNKNOWN = 0;
+    SUCCESS = 1;
+    FAILURE = 2;
+  }
+
+  int32 code = 1; // status code
+  string msg = 2; // status message
+  StatusFlag status = 3; // 0 for success, 1 for failure
+}
+
+message EmptyGrpsMessage {} // just for http request by brpc framework
+
+service GrpsService {
+  rpc Predict(GrpsMessage) returns (GrpsMessage) {};
+  rpc PredictStreaming(GrpsMessage) returns (stream GrpsMessage) {};
+  rpc Online(GrpsMessage) returns (GrpsMessage) {};
+  rpc Offline(GrpsMessage) returns (GrpsMessage) {};
+  rpc CheckLiveness(GrpsMessage) returns (GrpsMessage) {};
+  rpc CheckReadiness(GrpsMessage) returns (GrpsMessage) {};
+  rpc ServerMetadata(GrpsMessage) returns (GrpsMessage) {}; // get server metadata
+  rpc ModelMetadata(GrpsMessage) returns (GrpsMessage) {}; // get one model metadata
+}

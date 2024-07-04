@@ -1,0 +1,9 @@
+cmake_build
+build
+client/build
+.cache
+output
+.idea
+cmake-build-*
+client/cmake-build-*
+.listing

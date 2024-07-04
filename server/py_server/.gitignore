@@ -1,0 +1,15 @@
+# ide
+.idea
+
+# python
+**/__pycache__/
+
+# server generated files
+logs
+PID
+VERSION
+
+# build generated files
+build
+dist
+*.egg-info
