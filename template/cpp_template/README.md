@@ -189,7 +189,7 @@ docker logs -f my_grps
 
 客户端需要安装对应的依赖，目前支持c++、python、java客户端。python客户端环境最简单，安装对应[grps_apis pip依赖](https://github.com/NetEase-Media/grps/blob/master/apis/grps_apis/python_gens)
 即可。c++和java客户端环境可以参考[从源码构建](https://github.com/NetEase-Media/grps/blob/master/docs/17_BuildFromSources.md)
-构建对应的客户端环境。同时我们提供了一个支持python、c++、java客户端的docker环境，可以直接使用，见[grps client镜像](https://github.com/NetEase-Media/grps/blob/master/docs/19_ImageList.md#客户端镜像)。
+构建对应的客户端环境。同时我们提供了一个支持python、c++、java客户端的docker环境，可以直接使用，见[grps client镜像](https://github.com/NetEase-Media/grps/blob/master/docs/19_ImageList.md)。
 
 ### 4.1 python客户端
 
@@ -207,7 +207,7 @@ python3 client/python/grpc_client.py 0.0.0.0:7081
 
 ```bash
 # 这里使用已构建好的grps client容器环境，这里指定复用主机网络
-docker run -it --rm -v $(pwd):/my_grps -w /my_grps --network=host opengrps/client:1.1.0 bash
+docker run -it --rm -v $(pwd):/my_grps -w /my_grps --network=host registry.cn-hangzhou.aliyuncs.com/opengrps/client:1.1.0 bash
 
 # 构建client
 cd client/cpp
@@ -229,7 +229,7 @@ exit
 
 ```bash
 # 使用构建好的grps client容器环境，可以指定复用主机网络
-docker run -it --rm -v $(pwd):/my_grps -w /my_grps --network=host opengrps/client:1.1.0 bash
+docker run -it --rm -v $(pwd):/my_grps -w /my_grps --network=host registry.cn-hangzhou.aliyuncs.com/opengrps/client:1.1.0 bash
 
 # 构建client
 cd client/java

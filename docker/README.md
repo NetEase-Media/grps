@@ -205,5 +205,5 @@ docker build --build-arg PY_ENABLE=0 \
 
 ```bash
 # 可以跟上--build-arg https_proxy=http://ip:port --build-arg http_proxy=http://ip:port参数用于设置代理
-docker build -t opengrps/client:1.1.0 -f Dockerfile.grps_client1.1.0 .
+docker build -t registry.cn-hangzhou.aliyuncs.com/opengrps/client:1.1.0 -f Dockerfile.grps_client1.1.0 .
 ```

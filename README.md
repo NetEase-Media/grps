@@ -60,8 +60,6 @@ grps具有如下特性：
 * [从源码构建](./docs/17_BuildFromSources.md)
 * [远程开发与调试](./docs/18_RemoteDev.md)
 * [镜像列表](./docs/19_ImageList.md)
-* [Dlp环境开发](./docs/97_DlpDevelop.md)
-* [Horizon部署](./docs/98_HorizonDeploy.md)
 * [FAQ](./docs/90_FAQ.md)
 
 ## 4. TODO

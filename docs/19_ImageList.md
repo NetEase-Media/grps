@@ -17,4 +17,4 @@
 
 ## 客户端镜像
 
-* opengrps/client:1.1.0
+* registry.cn-hangzhou.aliyuncs.com/opengrps/client:1.1.0
