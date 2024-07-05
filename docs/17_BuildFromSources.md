@@ -4,6 +4,10 @@
 
 [跳转](../docker/README.md)。
 
+## 构建安装grps客户端环境
+
+[跳转](../apis/grps_apis/README.md)。
+
 ## 开发容器中重新编译安装grps
 
 有时需要在开发容器中重新编译安装grps，可以参考如下步骤：
