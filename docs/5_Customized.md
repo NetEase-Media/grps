@@ -838,7 +838,7 @@ python3 client/python/grpc_client.py 0.0.0.0:7081
 
 ```bash
 # 这里使用已构建好的grps client容器环境，这里指定复用主机网络
-docker run -it --rm -v $(pwd):/my_grps -w /my_grps --network=host opengrps/client bash
+docker run -it --rm -v $(pwd):/my_grps -w /my_grps --network=host registry.cn-hangzhou.aliyuncs.com/opengrps/client:1.1.0 bash
 
 # 构建client
 cd client/cpp
@@ -860,7 +860,7 @@ exit
 
 ```bash
 # 使用构建好的grps client容器环境，可以指定复用主机网络
-docker run -it --rm -v $(pwd):/my_grps -w /my_grps --network=host opengrps/client bash
+docker run -it --rm -v $(pwd):/my_grps -w /my_grps --network=host registry.cn-hangzhou.aliyuncs.com/opengrps/client:1.1.0 bash
 
 # 构建client
 cd client/java
