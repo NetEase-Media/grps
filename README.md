@@ -61,6 +61,7 @@ grps具有如下特性：
 * [远程开发与调试](./docs/18_RemoteDev.md)
 * [镜像列表](./docs/19_ImageList.md)
 * [FAQ](./docs/90_FAQ.md)
+* [样例](https://github.com/NetEase-Media/grps_examples)
 
 ## 4. TODO
 
