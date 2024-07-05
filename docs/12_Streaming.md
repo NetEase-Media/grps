@@ -7,8 +7,8 @@ grps自定义工程支持推理接口的streaming模式回复，用户通过一�
 
 ### cpp自定义工程
 
-[rnn-streaming](https://github.com/NetEase-Media/grps_examples/-/tree/master/cpp_examples/rnn-streaming)
+[rnn-streaming](https://github.com/NetEase-Media/grps_examples/tree/master/cpp_examples/rnn-streaming)
 
 ### py自定义工程
 
-[rnn-streaming](https://github.com/NetEase-Media/grps_examples/-/tree/master/py_examples/rnn-streaming)
+[rnn-streaming](https://github.com/NetEase-Media/grps_examples/tree/master/py_examples/rnn-streaming)

@@ -33,9 +33,9 @@ models:
 接口。
 
 ## 自定义样例
-* [resnet-50-tf](https://github.com/NetEase-Media/grps_examples/-/tree/master/cpp_examples/resnet-50-tf)
-* [resnet-50-torch](https://github.com/NetEase-Media/grps_examples/-/tree/master/cpp_examples/resnet-50-torch)
-* [resnet-50-trt](https://github.com/NetEase-Media/grps_examples/-/tree/master/cpp_examples/resnet-50-trt)
-* [resnet-50-tf](https://github.com/NetEase-Media/grps_examples/-/tree/master/py_examples/resnet-50-tf)
-* [resnet-50-torch](https://github.com/NetEase-Media/grps_examples/-/tree/master/py_examples/resnet-50-torch)
-* [resnet-50-trt](https://github.com/NetEase-Media/grps_examples/-/tree/master/py_examples/resnet-50-trt)
+* [resnet-50-tf](https://github.com/NetEase-Media/grps_examples/tree/master/cpp_examples/resnet-50-tf)
+* [resnet-50-torch](https://github.com/NetEase-Media/grps_examples/tree/master/cpp_examples/resnet-50-torch)
+* [resnet-50-trt](https://github.com/NetEase-Media/grps_examples/tree/master/cpp_examples/resnet-50-trt)
+* [resnet-50-tf](https://github.com/NetEase-Media/grps_examples/tree/master/py_examples/resnet-50-tf)
+* [resnet-50-torch](https://github.com/NetEase-Media/grps_examples/tree/master/py_examples/resnet-50-torch)
+* [resnet-50-trt](https://github.com/NetEase-Media/grps_examples/tree/master/py_examples/resnet-50-trt)

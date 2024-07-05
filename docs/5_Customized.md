@@ -891,5 +891,5 @@ grpst stop my_grps
 
 ## 样例
 
-* [cpp_examples](https://github.com/NetEase-Media/grps_examples/-/tree/master/cpp_examples)
-* [python_examples](https://github.com/NetEase-Media/grps_examples/-/tree/master/py_examples)。
+* [cpp_examples](https://github.com/NetEase-Media/grps_examples/tree/master/cpp_examples)
+* [python_examples](https://github.com/NetEase-Media/grps_examples/tree/master/py_examples)。

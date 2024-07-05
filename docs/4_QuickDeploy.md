@@ -238,4 +238,4 @@ grpst stop my_grps
 
 ## 样例
 
-见[quick_examples](https://github.com/NetEase-Media/grps_examples/-/tree/master/quick_examples)。
+见[quick_examples](https://github.com/NetEase-Media/grps_examples/tree/master/quick_examples)。

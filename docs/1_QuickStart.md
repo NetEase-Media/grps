@@ -20,12 +20,12 @@ docker run -it --runtime=nvidia --name "grps_dev" -p 7080:7080 -p 7081:7081 regi
 ## 快捷部署模型服务
 
 这里以torch模型服务为例，介绍快捷服务部署、客户端请求以及服务指标查看。<br>
-更多快捷部署样例见：[quick_examples](https://github.com/NetEase-Media/grps_examples/-/tree/update/quick_examples)
+更多快捷部署样例见：[quick_examples](https://github.com/NetEase-Media/grps_examples/tree/master/quick_examples)
 ，包含tensorflow、torch等模型快捷部署以及http和rpc客户端代码。
 
 ### resnet-50-torch
 
-准备[resnet-50模型相关文件](https://github.com/NetEase-Media/grps_examples/-/tree/master/cpp_examples/resnet-50-torch/data)。
+准备[resnet-50模型相关文件](https://github.com/NetEase-Media/grps_examples/tree/master/cpp_examples/resnet-50-torch/data)。
 其中包含了torch jit script model格式的模型文件、label文件以及客户端请求样例图片。
 
 ```bash
@@ -95,7 +95,7 @@ grpst stop my_grps
 
 这里以自定义python模型工程为例简要说明自定义模型工程的流程，包含创建工程、自定义、打包、部署、模拟请求等。<br>
 完整自定义模型说明见：[5_Customized.md](5_Customized.md)。<br>
-更多自定义模型工程样例见：[cpp_examples](https://github.com/NetEase-Media/grps_examples/-/tree/master/cpp_examples)，[py_examples](https://github.com/NetEase-Media/grps_examples/-/tree/master/py_examples)。
+更多自定义模型工程样例见：[cpp_examples](https://github.com/NetEase-Media/grps_examples/tree/master/cpp_examples)，[py_examples](https://github.com/NetEase-Media/grps_examples/tree/master/py_examples)。
 
 ### 简易自定义模型服务
 
