@@ -24,7 +24,7 @@ class YourInferer(ModelInferer):
             start service.
         """
         super(YourInferer, self).init(path, device, args)
-        clogger.info('your infer init, path: {}, device: {}, args: {}.'.format(path, device, args))
+        clogger.info('your inferer init, path: {}, device: {}, args: {}.'.format(path, device, args))
 
     def load(self):
         """
