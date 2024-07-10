@@ -9,6 +9,16 @@ bash archive.sh
 
 ## 构建grps
 
+#### Dockerfile.grps1.1.0_cuda11.8_cudnn8.6_vllm0.4.3_py3.10
+
+grps1.1.0 + cuda11.8 + cudnn8.6 + vllm0.4.3 + python3.10
+
+```bash
+# 可以跟上如下参数
+# --build-arg https_proxy=http://ip:port --build-arg http_proxy=http://ip:port参数用于设置代理
+docker build -t registry.cn-hangzhou.aliyuncs.com/opengrps/grps_gpu:grps1.1.0_cuda11.8_cudnn8.6_vllm0.4.3_py3.10 -f Dockerfile.grps1.1.0_cuda11.8_cudnn8.6_vllm0.4.3_py3.10 .
+```
+
 #### Dockerfile.grps1.1.0_cuda12.4_cudnn9.1_trt8.6.3_py3.10
 
 grps1.1.0 + cuda12.4 + cudnn9.1 + trt8.6.3 + python3.10

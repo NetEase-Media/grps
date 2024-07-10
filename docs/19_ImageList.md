@@ -15,6 +15,10 @@
 * registry.cn-hangzhou.aliyuncs.com/opengrps/grps_gpu:grps1.1.0_cuda12.1_cudnn8.9_trt8.6.1_py3.8
 * registry.cn-hangzhou.aliyuncs.com/opengrps/grps_gpu:grps1.1.0_cuda12.4_cudnn9.1_trt8.6.3_py3.10
 
+### vllm
+
+* registry.cn-hangzhou.aliyuncs.com/opengrps/grps_gpu:grps1.1.0_cuda11.8_cudnn8.6_vllm0.4.3_py3.10
+
 ## 客户端镜像
 
 * registry.cn-hangzhou.aliyuncs.com/opengrps/client:1.1.0
