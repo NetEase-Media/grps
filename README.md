@@ -22,7 +22,7 @@ grps具有如下特性：
 * 多模型支持：支持部署多个模型，多个模型可以组合成一个服务或者单独提供服务。
 * 多卡支持：支持配置方式选择gpu部署模型，支持监控多```gpu```使用情况。
 * 更好的性能：通过```rpc```支持、纯```c++```服务支持、```tensorrt```多流推理支持、```dynamic batching```支持等等，使得服务能够达到更高的性能。
-* LLM支持：目前通过自定义后端插件方式支持vllm，见[vllm样例](https://github.com/NetEase-Media/grps_examples/tree/master/py_examples/vllm)。
+* LLM支持：目前通过自定义后端插件方式支持vllm，见[vllm样例](https://github.com/NetEase-Media/grps_examples/tree/master/py_examples/vllm)，通过```LLMEngine Api```实现vllm推理后端，同```vllm-api-server```相比较使用的服务性能有所提升。
 
 ## 2. 目录结构
 
