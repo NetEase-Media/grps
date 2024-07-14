@@ -1,12 +1,12 @@
 ![grps.png](./docs/grps.png)
 
-# GRPS(Generic Realtime Predict Service)
+# GRPS(Generic Realtime Prediction Service)
 
 ![grps_outline.png](./docs/grps_outline.png)
 
 ## 1. 介绍
 
-一款支持```tf/torch/trt/vllm```以及更多```nn```框架的、稳定的、性能较好的模型在线部署框架，核心目的是帮助用户快速搭建一个在线模型推理服务，将模型部署到线上生产环境，并通过```REST/RPC```接口方式提供服务。
+一款支持```tf/torch/trt/vllm```以及更多```nn```框架的、稳定的、性能较好的模型在线部署框架，核心目的是帮助用户快速搭建一个在线模型推理服务，将模型部署到线上生产环境，并通过```HTTP/RPC```接口方式提供服务。
 
 grps具有如下特性：
 
