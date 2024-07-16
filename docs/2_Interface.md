@@ -5,7 +5,7 @@
 1. [统一payload](#统一payload)
 2. [RESTful接口](#restful接口)
 3. [RPC接口](#rpc接口)
-4. [Streaming模式](#streaming模式)
+4. [Streaming流式访问](#Streaming流式访问)
 5. [自定义HTTP格式](#自定义http格式)
 
 ## 统一payload
