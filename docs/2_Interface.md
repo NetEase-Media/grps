@@ -373,7 +373,7 @@ rpc ServerMetadata(GrpsMessage) returns (GrpsMessage) {};
 rpc ModelMetadata(GrpsMessage) returns (GrpsMessage) {}; 
 ```
 
-## Streaming模式
+## Streaming流式访问
 
 仅推理接口支持streaming模式，streaming模式可以实现模型持续推理并返回结果，具体实现方式见[自定义模型工程-streaming流式返回](./5_Customized.md#3-streaming流式返回)。
 
