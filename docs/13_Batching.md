@@ -32,7 +32,41 @@ models:
 用户需要实现对应的```Converter::BatchPreProcess```、```Converter::BatchPostProcess```以及```ModelInferer::BatchInfer```
 接口。
 
+## 性能提升
+
+通过batching模式，可以有效提升服务性能，例如使用[resnet-50-tf](https://github.com/NetEase-Media/grps_examples/tree/master/cpp_examples/resnet-50-tf)
+做测试，结果如下：
+环境：
+
+```
+镜像：registry.cn-hangzhou.aliyuncs.com/opengrps/grps_gpu:grps1.1.0_cuda10.1_cudnn7.6.5_tf2.3.0_torch1.8.1_py3.7
+GPU：K80
+```
+
+Latency:
+
+| 模式 \ latency(ms) \ 并发 | 1      | 2      | 4        | 8       | 16      | 32      |
+|-----------------------|--------|--------|----------|---------|---------|---------|
+| 普通模式                  | 44.08  | 37.29  | 64.57    | 134.56  | 263.23  | 545.6   |
+| dynamic batching      | 45.19	 | 37.96	 | 49.39	   | 88.13	  | 168.8	  | 349.72  |
+| 同比                    | 2.52%  | 1.80%	 | -23.51%	 | -34.51% | -35.87% | -35.90% |
+
+显存:
+
+| stream个数 \ GPU显存(MB) \ 并发 | 1     | 2     | 4     | 8     | 16    | 32   |
+|---------------------------|-------|-------|-------|-------|-------|------|
+| 1                         | 4337  | 4337  | 4337  | 4337  | 4337  | 4337 |
+| 2                         | 4337	 | 4337	 | 4337	 | 4337	 | 4337	 | 4337 |
+
+GPU使用率:
+
+| stream个数 \ GPU使用率(%) \ 并发 | 1   | 2   | 4   | 8   | 16  | 32 |
+|---------------------------|-----|-----|-----|-----|-----|----|
+| 1                         | 49  | 80  | 97  | 97  | 97  | 97 |
+| 2                         | 51	 | 78	 | 93	 | 97	 | 97	 | 97 |
+
 ## 自定义样例
+
 * [resnet-50-tf](https://github.com/NetEase-Media/grps_examples/tree/master/cpp_examples/resnet-50-tf)
 * [resnet-50-torch](https://github.com/NetEase-Media/grps_examples/tree/master/cpp_examples/resnet-50-torch)
 * [resnet-50-trt](https://github.com/NetEase-Media/grps_examples/tree/master/cpp_examples/resnet-50-trt)

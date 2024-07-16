@@ -22,7 +22,7 @@ grps具有如下特性：
 * 多模型支持：支持部署多个模型，多个模型可以组合成一个服务或者单独提供服务。
 * 多卡支持：支持配置方式选择gpu部署模型，支持监控多```gpu```使用情况。
 * 更好的性能：通过```rpc```支持、纯```c++```服务支持、```tensorrt```多流推理支持、```dynamic batching```支持等等，使得服务能够达到更高的性能。
-* LLM支持：目前通过自定义后端插件方式支持vllm，见[vllm样例](https://github.com/NetEase-Media/grps_examples/tree/master/py_examples/vllm)，通过```LLMEngine Api```实现vllm推理后端，同```vllm-api-server```相比服务性能有所提升。
+* LLM支持：目前通过自定义后端插件方式支持vllm，见[vllm样例](https://github.com/NetEase-Media/grps_examples/tree/master/py_examples/vllm)，通过```LLMEngine Api```实现vllm推理后端，同```vllm-api-server```相比较服务性能有所提升。
 
 ## 2. 目录结构
 
@@ -48,16 +48,17 @@ grps具有如下特性：
 * [快捷部署](./docs/4_QuickDeploy.md)
 * [自定义模型工程](./docs/5_Customized.md)
 * [前后处理转换器](./docs/6_InternalConverter.md)
-* [模型推理后端](./docs/7_InternalInferer.md)
+* [NN推理后端](./docs/7_InternalInferer.md)
 * [客户端说明](./docs/8_Client.md)
 * [日志系统](./docs/9_Logger.md)
 * [服务指标监控说明](./docs/10_Monitor.md)
 * [自定义HTTP](./docs/11_CustomizedHttp.md)
 * [Streaming](./docs/12_Streaming.md)
 * [Batching](./docs/13_Batching.md)
+* [TRT多流模式](./docs/20_TrtMultiStream.md)
 * [多模型支持](./docs/14_MultiModels.md)
 * [服务限制](./docs/15_ServiceLimit.md)
-* [docker部署](./docs/16_DockerDeploy.md)
+* [Docker部署](./docs/16_DockerDeploy.md)
 * [从源码构建](./docs/17_BuildFromSources.md)
 * [远程开发与调试](./docs/18_RemoteDev.md)
 * [镜像列表](./docs/19_ImageList.md)
