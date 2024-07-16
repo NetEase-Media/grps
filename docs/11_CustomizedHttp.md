@@ -1,6 +1,14 @@
 # 自定义HTTP
 
-grps自定义工程支持自定义HTTP的输入和输出格式，具体见[跳转](./2_Interface.md#自定义http格式)。
+grps自定义工程支持自定义HTTP的输入和输出格式。
+
+## 自定义实现
+
+见[实现自定义http请求获取和返回](5_Customized.md#4-实现自定义http请求获取和返回)。
+
+## 接口访问
+
+见[自定义http格式访问](./2_Interface.md#自定义http格式访问)。
 
 ## 样例
 

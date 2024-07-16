@@ -6,7 +6,7 @@
 2. [RESTful接口](#restful接口)
 3. [RPC接口](#rpc接口)
 4. [Streaming流式访问](#Streaming流式访问)
-5. [自定义HTTP格式](#自定义http格式)
+5. [自定义HTTP格式访问](#自定义http格式访问)
 
 ## 统一payload
 
@@ -395,7 +395,7 @@ rpc PredictStreaming(GrpsMessage) returns (stream GrpsMessage) {};
 
 暂不支持。
 
-## 自定义HTTP格式
+## 自定义HTTP格式访问
 
 推理接口支持用户完全自定义http请求和返回格式，用户需要打开自定义http配置（```server.yml - interface -
 customized_predict_http```
