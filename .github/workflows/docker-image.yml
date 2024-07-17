@@ -1,0 +1,18 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build grps1.1.0_cuda11.8_cudnn8.6_vllm0.4.3_py3.10
+      run: cd docker && bash archive.sh && docker build -t registry.cn-hangzhou.aliyuncs.com/opengrps/grps_gpu:grps1.1.0_cuda11.8_cudnn8.6_vllm0.4.3_py3.10 -f Dockerfile.grps1.1.0_cuda11.8_cudnn8.6_vllm0.4.3_py3.10 .
