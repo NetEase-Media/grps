@@ -4,7 +4,26 @@ Tensorrt推理后端通过创建多个上下文和stream支持多流模式，可
 
 ## 使用
 
-见[tensorrt inferer说明](7_InternalInferer.md#tensorrt-inferer)。
+```grpst trt_serve```快捷部署以及自定义工程中均可打开，如下：
+
+```
+# trt_serve 快捷部署参数
+grpst trt_serve /tmp/engine.trt \
+      ... \
+      --streams 4 # 打开多流配置可以提高GPU使用率以及推理性能，相应也会增加GPU显存占用。
+      ...
+
+
+# 自定义工程配置(inference.yml)
+models:
+  - name: your_model
+    ...
+    inferer_type: tensorrt
+    ...
+	inferer_args:
+  		streams: 4
+    ...
+```
 
 ## 性能提升
 
