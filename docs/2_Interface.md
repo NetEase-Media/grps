@@ -7,6 +7,7 @@
 3. [RPC接口](#rpc接口)
 4. [Streaming流式访问](#Streaming流式访问)
 5. [自定义HTTP格式访问](#自定义http格式访问)
+6. [模型选择](#模型选择)
 
 ## 统一payload
 
