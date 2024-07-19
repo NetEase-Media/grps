@@ -1,4 +1,4 @@
-# Grpst(Generic Realtime Predict Service Tool)
+# Grpst(Generic Realtime Prediction Service Tool)
 
 grpst作为grps服务的工具链，提供了一系列工具方便算法用户快速接入和集成自己的模型服务，包括创建工程、打包工程、部署工程、查看状态等。
 
