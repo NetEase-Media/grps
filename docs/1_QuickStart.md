@@ -14,7 +14,7 @@
 ```bash
 docker pull registry.cn-hangzhou.aliyuncs.com/opengrps/grps_gpu:grps1.1.0_cuda10.1_cudnn7.6.5_tf2.3.0_torch1.8.1_py3.7
 # 映射端口7080(http)和7081(rpc)，用于客户端请求
-docker run -it --runtime=nvidia --name "grps_dev" -p 7080:7080 -p 7081:7081 registry.cn-hangzhou.aliyuncs.com/opengrps/grps_gpu:grps1.1.0_cuda10.1_cudnn7.6.5_tf2.3.0_torch1.8.1_py3.7 bash
+docker run -it --rm --runtime=nvidia --name "grps_dev" -p 7080:7080 -p 7081:7081 registry.cn-hangzhou.aliyuncs.com/opengrps/grps_gpu:grps1.1.0_cuda10.1_cudnn7.6.5_tf2.3.0_torch1.8.1_py3.7 bash
 ```
 
 ## 快捷部署模型服务
