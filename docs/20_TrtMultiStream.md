@@ -34,7 +34,7 @@ models:
 
 ```
 镜像：registry.cn-hangzhou.aliyuncs.com/opengrps/grps_gpu:grps1.1.0_cuda11.3_cudnn8.2_trt7.2.3_py3.8
-GPU：1080Ti
+GPU：K80
 ```
 
 Latency:
