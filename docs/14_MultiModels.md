@@ -4,7 +4,7 @@ grps自定义工程支持部署多个模型，多个模型可以组合成一个�
 
 ## 配置
 
-grps模型推理配置定义在```inference.yml```文件中，详细介绍见[跳转](./5_Customized.md#1-inferenceyml)。
+grps模型推理配置定义在```inference.yml```文件中，详细介绍见[inference.yml](./5_Customized.md#1-inferenceyml)。
 如下样例我们定义了两个模型分别为```your_model-1.0.0```和```your_model2-1.0.0```，分别部署到```gpu:0```以及```gpu:2```
 上，并定义串联调用关系：
 
@@ -49,4 +49,4 @@ dag:
 
 ## 调用
 
-当我们调用predict接口时，默认没有指定模型名的情况下会使用默认模型dag进行推理，如果我们想使用某一个模型进行推理，可以在payload或query-param中指明，例如[跳转](./2_Interface.md#模型选择)。
+当我们调用predict接口时，默认没有指定模型名的情况下会使用默认模型dag进行推理，如果我们想使用某一个模型进行推理，可以在payload或query-param中指明，具体见[模型选择](./2_Interface.md#模型选择)。

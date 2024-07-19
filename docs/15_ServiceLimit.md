@@ -17,4 +17,4 @@ grps支持tf和torch显存限制功能，适用于共享gpu场景；同时也只
 
 ## 自定义模型工程
 
-通过配置文件```server.yml```实现，见[跳转](5_Customized.md#2-serveryml)。
+通过配置文件```server.yml```实现，见[server.yml配置](5_Customized.md#2-serveryml)。

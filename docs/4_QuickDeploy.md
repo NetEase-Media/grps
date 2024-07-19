@@ -29,7 +29,7 @@ model格式模型文件，导出方法参考官方文档：[tensorflow saved mod
 
 ### tensorflow
 
-使用```grpst tf_serve```命令进行部署，详细参数说明见[跳转](../grpst/README.md#快速部署tensorflow模型服务)
+使用```grpst tf_serve```命令进行部署，详细参数说明见[快速部署tensorflow模型服务](../grpst/README.md#快速部署tensorflow模型服务)
 ，也可以执行```grpst tf_serve -h```查看。
 
 ```bash
@@ -58,7 +58,7 @@ grpst tf_serve /tmp/saved_model \  # 模型文件路径
 
 ### torch
 
-使用```grpst torch_serve```命令进行部署，详细参数说明见[跳转](../grpst/README.md#快速部署torch模型服务)
+使用```grpst torch_serve```命令进行部署，详细参数说明见[快速部署torch模型服务](../grpst/README.md#快速部署torch模型服务)
 ，也可以执行```grpst torch_serve -h```查看。
 
 ```bash
@@ -87,7 +87,7 @@ grpst torch_serve /tmp/script_model.pt \  # 模型文件路径
 
 ### tensorrt
 
-使用```grpst trt_serve```命令进行部署，详细参数说明见[跳转](../grpst/README.md#快速部署tensorrt模型服务)
+使用```grpst trt_serve```命令进行部署，详细参数说明见[快速部署tensorrt模型服务](../grpst/README.md#快速部署tensorrt模型服务)
 ，也可以执行```grpst trt_serve -h```查看。
 
 ```bash
