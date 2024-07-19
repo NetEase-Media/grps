@@ -31,7 +31,7 @@ docker run -it --rm --runtime=nvidia --name "grps_dev" -p 7080:7080 -p 7081:7081
 ```bash
 # 下载模型文件
 apt update && apt install git-lfs
-git clone https://github.com/NetEase-Media/grps_examples.git
+git lfs clone https://github.com/NetEase-Media/grps_examples.git
 cd grps_examples/cpp_examples/resnet-50-torch/data
 
 # 启动服务
