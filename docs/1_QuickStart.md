@@ -29,6 +29,11 @@ docker run -it --rm --runtime=nvidia --name "grps_dev" -p 7080:7080 -p 7081:7081
 其中包含了torch jit script model格式的模型文件、label文件以及客户端请求样例图片。
 
 ```bash
+# 下载模型文件
+apt update && apt install git-lfs
+git clone https://github.com/NetEase-Media/grps_examples.git
+cd grps_examples/cpp_examples/resnet-50-torch/data
+
 # 启动服务
 # 部署成功后会自动跟踪日志，可以使用ctrl+c退出跟踪
 grpst torch_serve ./resnet50_pretrained.pt
@@ -40,7 +45,7 @@ PORT(HTTP,RPC)      NAME                PID                 DEPLOY_PATH
 7080,7081           my_grps             138949              /root/.grps/my_grps
 ```
 
-书写客户端代码如下：
+书写客户端代码(client.py)如下：
 
 ```python
 import numpy as np
@@ -200,4 +205,7 @@ curl -X POST -H "Content-Type:application/json" -d '{"str_data": "2"}' http://0.
 
 ```bash
 grpst stop my_grps
+
+# 退出开发容器
+exit
 ```
