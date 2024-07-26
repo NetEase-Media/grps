@@ -30,6 +30,9 @@ void YourInferer::Infer(const std::vector<std::pair<std::string, TensorWrapper>>
     msg.set_str_data("hello client.");
     ctx.StreamingRespond(msg);
     usleep(1e4); // Simulate the process of model infer.
+    if (ctx.IfDisconnected()) { // Check if client is disconnected.
+      return;
+    }
     ::grps::protos::v1::GrpsMessage msg2;
     msg2.set_str_data("hello client2.");
     ctx.StreamingRespond(msg2);
@@ -50,6 +53,9 @@ void YourInferer::BatchInfer(const std::vector<std::pair<std::string, TensorWrap
       msg.set_str_data("hello client.");
       ctx->StreamingRespond(msg);
       usleep(1e4); // Simulate the process of model infer.
+      if (ctx->IfDisconnected()) { // Check if client is disconnected.
+        continue;
+      }
       ::grps::protos::v1::GrpsMessage msg2;
       msg2.set_str_data("hello client2.");
       ctx->StreamingRespond(msg2);
@@ -71,6 +77,9 @@ void YourInferer::Infer(const ::grps::protos::v1::GrpsMessage& input,
     msg.set_str_data("hello client.");
     ctx.StreamingRespond(msg);
     usleep(1e4); // Simulate the process of model infer.
+    if (ctx.IfDisconnected()) { // Check if client is disconnected.
+      return;
+    }
     ::grps::protos::v1::GrpsMessage msg2;
     msg2.set_str_data("hello client2.");
     ctx.StreamingRespond(msg2);
@@ -91,6 +100,9 @@ void YourInferer::BatchInfer(std::vector<const ::grps::protos::v1::GrpsMessage*>
       msg.set_str_data("hello client.");
       ctx->StreamingRespond(msg);
       usleep(1e4); // Simulate the process of model infer.
+      if (ctx->IfDisconnected()) { // Check if client is disconnected.
+        continue;
+      }
       ::grps::protos::v1::GrpsMessage msg2;
       msg2.set_str_data("hello client2.");
       ctx->StreamingRespond(msg2);

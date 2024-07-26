@@ -97,6 +97,7 @@ target_link_libraries(grps_server PUBLIC
         libgrps-server-customized.so
         grps-server-framework
         "-Wl,--no-whole-archive"
+        ${MPI_LIBRARIES}
         boost_system
         boost_thread
         brpc

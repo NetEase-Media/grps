@@ -43,9 +43,16 @@ function install_dep() {
   LOG INFO "Installing ${dep_name}..."
   cd ./${dep_name}
 
+  if [ -f ".install_flag" ]; then
+    LOG INFO "${dep_name} has been installed, skip."
+    cd ../
+    return
+  fi
+
   bash build.sh
   check_ret "Install ${dep_name}"
 
+  touch .install_flag
   cd ../
 }
 
@@ -61,12 +68,17 @@ LOG INFO "Installing from apt..."
 apt update
 run_and_check apt install -yq make automake bison flex libtool pkg-config zip curl lsof build-essential
 run_and_check apt install -yq libz-dev libevent-dev libssl-dev libunwind8-dev libc-ares-dev libleveldb-dev libsnappy-dev libapr1-dev libaprutil1-dev libdw-dev
+
+install_dep openmpi
 if [ "$cpp_enable" = "1" ]; then
   LOG INFO "Installing cmake..."
-  rm -rf ./cmake-3.18.5-Linux-x86_64.sh
-  wget https://github.com/Kitware/CMake/releases/download/v3.18.5/cmake-3.18.5-Linux-x86_64.sh
-  run_and_check bash ./cmake-3.18.5-Linux-x86_64.sh --prefix=/usr/ --skip-license
-  rm -rf ./cmake-3.18.5-Linux-x86_64.sh
+  if [ -z "$(command -v cmake)" ]; then
+    rm -rf ./cmake-3.18.5-Linux-x86_64.sh
+    wget https://github.com/Kitware/CMake/releases/download/v3.18.5/cmake-3.18.5-Linux-x86_64.sh
+    run_and_check bash ./cmake-3.18.5-Linux-x86_64.sh --prefix=/usr/ --skip-license
+    rm -rf ./cmake-3.18.5-Linux-x86_64.sh
+  fi
+  install_dep protobuf
   install_dep gflags
   install_dep gtest
   install_dep glog
@@ -80,11 +92,11 @@ if [ "$cpp_enable" = "1" ]; then
   install_dep boost
 fi
 if [ "$py_enable" = "1" ]; then
-  LOG INFO "Installing grpc python lib..."
-  run_and_check pip3 install grpcio==1.46.0 grpcio-tools==1.46.0 requests
+  LOG INFO "Installing python deps lib..."
+  run_and_check pip3 install grpcio==1.46.0 grpcio-tools==1.46.0 requests mpi4py>=3.1.6
 fi
 if [ "$java_enable" = "1" ]; then
-  LOG INFO "Installing grpc java lib..."
+  LOG INFO "Installing java deps lib..."
   rm -rf protoc-gen-grpc-java-1.46.0-linux-x86_64.exe
   run_and_check wget https://repo1.maven.org/maven2/io/grpc/protoc-gen-grpc-java/1.46.0/protoc-gen-grpc-java-1.46.0-linux-x86_64.exe
   run_and_check mv protoc-gen-grpc-java-1.46.0-linux-x86_64.exe /usr/local/bin/protoc-gen-grpc-java

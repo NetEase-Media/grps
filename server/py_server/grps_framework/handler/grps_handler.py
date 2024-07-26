@@ -12,7 +12,7 @@ from concurrent.futures import ThreadPoolExecutor
 import grpc
 import numpy as np
 import yaml
-from flask import request, Request, Response
+from flask import request, Request, Response, stream_with_context
 from google.protobuf.json_format import MessageToDict, MessageToJson, ParseDict
 
 from grps_framework.apis import grps_pb2, grps_pb2_grpc
@@ -41,7 +41,7 @@ class GrpcHandler(grps_pb2_grpc.GrpsServiceServicer):
         begin_time = time.time()
 
         try:
-            grps_context = GrpsContext()
+            grps_context = GrpsContext(grpc_context=context)
             grpc_response = self.__tp.submit(self.__executor.infer, request, grps_context, request.model).result()
 
             if not grps_context.has_err() and str(type(grpc_response)) != str(GrpsMessage):
@@ -384,7 +384,7 @@ class HttpHandler(object):
             task = self.__tp.submit(self.__predict_task, content_type, body, request._get_current_object(),
                                     is_streaming, ret_ndarray, grps_context)
             if is_streaming:
-                return Response(grps_context.http_streaming_generator(), mimetype='application/octet-stream')
+                return Response(stream_with_context(grps_context.http_streaming_generator()), mimetype='application/octet-stream')
             else:
                 res = task.result()
                 return res
@@ -564,7 +564,8 @@ class HttpHandler(object):
             task = self.__tp.submit(self.__predict_impl_with_custom_body_task, request._get_current_object(),
                                     is_streaming, grps_context)
             if is_streaming:
-                return Response(grps_context.http_streaming_generator(), mimetype='application/octet-stream')
+                return Response(stream_with_context(grps_context.http_streaming_generator()),
+                                mimetype='application/octet-stream')
             else:
                 res = task.result()
                 return res

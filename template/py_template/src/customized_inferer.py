@@ -63,6 +63,8 @@ class YourInferer(ModelInferer):
         if context.if_streaming():
             context.stream_respond(grps_pb2.GrpsMessage(str_data='stream data 1'))
             time.sleep(0.1)  # Simulate the process of model infer.
+            if context.if_disconnected():  # Check if client is disconnected.
+                return {}
             context.stream_respond(grps_pb2.GrpsMessage(str_data='stream data 2'))
             time.sleep(0.1)  # Simulate the process of model infer.
 
@@ -92,6 +94,8 @@ class YourInferer(ModelInferer):
             if context.if_streaming():
                 context.stream_respond(grps_pb2.GrpsMessage(str_data='stream data 1'))
                 time.sleep(0.1)
+                if context.if_disconnected():  # Check if client is disconnected.
+                    continue
                 context.stream_respond(grps_pb2.GrpsMessage(str_data='stream data 2'))
                 time.sleep(0.1)
 

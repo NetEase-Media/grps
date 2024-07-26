@@ -173,7 +173,7 @@ exit
 cd my_grps
 
 # 构建自定义工程docker镜像
-# 注意可以修改Dockerfile中的基础镜像版本，选择自己所需的版本号，默认为grps_gpu:base镜像
+# 注意可以修改Dockerfile中的基础镜像版本，选择自己所需的版本号，默认为registry.cn-hangzhou.aliyuncs.com/opengrps/grps_gpu:grps1.1.0_cuda10.1_cudnn7.6.5_tf2.3.0_torch1.8.1_py3.7镜像
 # 启动命令grpst start可以跟上--timeout参数指定服务启动超时时间，默认为300s
 docker build -t my_grps:1.0.0 -f docker/Dockerfile .
 

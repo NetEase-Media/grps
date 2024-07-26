@@ -13,6 +13,8 @@
 #include <regex>
 
 #define BACKWARD_HAS_DW 1
+#include <mpi.h>
+
 #include "common/backward.hpp"
 #include "common/global_gflags.h"
 #include "config/global_config.h"
@@ -34,21 +36,28 @@ backward::SignalHandling sh;
 using namespace netease::grps;
 
 int main(int argc, char** argv) {
-  // Dump pid.
-  std::string pid_path = "./PID";
-  pid_t pid = getpid();
-  std::fstream pid_file(pid_path, std::ios::out | std::ios::trunc);
-  assert(pid_file.is_open());
-  pid_file << pid;
-  pid_file.flush();
-  pid_file.close();
+  MPI_Init(&argc, &argv);
+  int world_rank;
+  MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+  int world_size;
+  MPI_Comm_size(MPI_COMM_WORLD, &world_size);
 
-  // Dump version.
-  std::string version_path = "./VERSION";
-  std::fstream version_file(version_path, std::ios::out | std::ios::trunc);
-  assert(version_file.is_open());
-  version_file << GRPS_VERSION;
-  version_file.close();
+  if (world_rank == 0) {
+    // Dump pid.
+    std::string pid_path = "./PID";
+    pid_t pid = getpid();
+    std::fstream pid_file(pid_path, std::ios::out | std::ios::trunc);
+    assert(pid_file.is_open());
+    pid_file << pid;
+    pid_file.flush();
+    pid_file.close();
+    // Dump version.
+    std::string version_path = "./VERSION";
+    std::fstream version_file(version_path, std::ios::out | std::ios::trunc);
+    assert(version_file.is_open());
+    version_file << GRPS_VERSION;
+    version_file.close();
+  }
 
   GrpsServerCustomizedLibInit(); // Init customized lib.
 
@@ -62,6 +71,8 @@ int main(int argc, char** argv) {
   if (!GlobalConfig::Instance().Load()) {
     return -1;
   }
+  GlobalConfig::Instance().set_mpi({world_size, world_rank});
+
   const auto& server_config = GlobalConfig::Instance().server_config();
 
   // Init logger.
@@ -90,6 +101,12 @@ int main(int argc, char** argv) {
   } catch (const std::exception& e) {
     LOG4(FATAL, "Init executor failed: " << e.what());
     abort();
+  }
+
+  if (world_rank > 0) { // Wait forever.
+    while (true) {
+      std::this_thread::sleep_for(std::chrono::seconds(1024));
+    }
   }
 
   // Check interface framework.
@@ -293,5 +310,6 @@ int main(int argc, char** argv) {
   // Wait until Ctrl-C is pressed, then Stop() and Join() the server.
   server.RunUntilAskedToQuit();
   Executor::Instance().Terminate();
+  MPI_Finalize();
   return 0;
 }

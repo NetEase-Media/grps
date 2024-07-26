@@ -13,6 +13,7 @@
         2. [设置错误信息](#2-设置错误信息)
         3. [streaming流式返回](#3-streaming流式返回)
         4. [实现自定义http请求获取和返回](#4-实现自定义http请求获取和返回)
+        5. [检测链接是否断开](#5-检测链接是否断开)
     5. [配置文件详细说明](#配置文件详细说明)
 4. [构建打包](#单元测试并构建打包为marmodel-archived格式)
 5. [部署](#部署)
@@ -646,6 +647,24 @@ ctx.http_controller()->response_attachment().append("http_body");
 ctx.http_controller()->http_response().set_status_code(brpc::HTTP_STATUS_OK);
 // Streaming respond as follows:
 ctx.CustomizedHttpStreamingRespond();
+```
+
+#### 5. 检测链接是否断开
+
+有时候我们需要在服务端检测和客户端的链接是否断开，尤其是streaming模式返回。
+
+python：
+
+```python
+# 检测链接是否断开
+context.if_disconnected()
+```
+
+c++：
+
+```c++
+// 检测链接是否断开
+context.IfDisconnected()
 ```
 
 ### 配置文件详细说明

@@ -3,7 +3,6 @@
 # Date   2023/10/7
 # Brief  Grps context. Use grps context, you can save and get user data, send streaming response, set error message,
 #        or implement customized http.
-import asyncio
 import http
 import queue
 import concurrent.futures
@@ -31,6 +30,7 @@ class GrpsContext(object):
         self._converter = None
         self._inferer = None
         self._batcher_future = None
+        self._if_disconnected = False
 
     # ---------------------------- User data function. ----------------------------
 
@@ -120,10 +120,13 @@ class GrpsContext(object):
         while self._http_streaming_run:
             msg = self._http_streaming_queue.get()
             if str(type(msg)) == str(GrpsMessage):
-                if msg.bin_data:
-                    yield str(msg.bin_data)
-                else:
-                    yield MessageToJson(msg, including_default_value_fields=False, preserving_proto_field_name=True)
+                try:
+                    if msg.bin_data:
+                        yield str(msg.bin_data)
+                    else:
+                        yield MessageToJson(msg, including_default_value_fields=False, preserving_proto_field_name=True)
+                except GeneratorExit as e:
+                    self._if_disconnected = True
             elif isinstance(msg, str) or isinstance(msg, bytes):
                 yield msg
 
@@ -291,3 +294,9 @@ class GrpsContext(object):
     @property
     def inferer(self):
         return self._inferer
+
+    def if_disconnected(self):
+        """If connection with client is disconnected. [NOTE: Do not support http non-streaming request]"""
+        if self._grpc_context is not None:
+            self._if_disconnected = not self._grpc_context.is_active()
+        return self._if_disconnected

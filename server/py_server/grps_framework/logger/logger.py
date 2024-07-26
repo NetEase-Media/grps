@@ -20,12 +20,13 @@ import logging
 import os.path
 from logging import handlers
 
+from mpi4py import MPI
+
 from grps_framework.conf.conf import global_conf
-from grps_framework.constant import SERVER_LOG_DIR, SERVER_LOG_NAME, USR_LOG_NAME
+from grps_framework.constant import SERVER_LOG_NAME, USR_LOG_NAME
 
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.WARNING)  # Set flask framework log level.
-
 
 class TimeRotatingFileLogger(object):
     """
@@ -70,8 +71,17 @@ if global_conf.loaded:
             'log_backup_count must not be less than 1, log_backup_count: {}.'.format(log_backup_count))
         exit(-1)
 
+    comm = MPI.COMM_WORLD
+    world_rank = comm.Get_rank()
+
     log_dir = global_conf.server_conf['log']['log_dir']  # Log dir.
-    logger = get_logger(log_dir, SERVER_LOG_NAME, log_backup_count)  # Server logger.
-    clogger = get_logger(log_dir, USR_LOG_NAME, log_backup_count)  # User logger.
+    if world_rank > 0:
+        server_log_name = SERVER_LOG_NAME + '-rank' + str(world_rank)
+        usr_log_name = USR_LOG_NAME + '-rank' + str(world_rank)
+    else:
+        server_log_name = SERVER_LOG_NAME
+        usr_log_name = USR_LOG_NAME
+    logger = get_logger(log_dir, server_log_name, log_backup_count)  # Server logger.
+    clogger = get_logger(log_dir, usr_log_name, log_backup_count)  # User logger.
     logger.info('Daily logger initialized, sys_log_path: {}, user_log_path: {}, user_log_backup_count: {}.'.format(
-        SERVER_LOG_DIR + '/' + SERVER_LOG_NAME, log_dir + '/' + USR_LOG_NAME, log_backup_count))
+        log_dir + '/' + server_log_name, log_dir + '/' + usr_log_name, log_backup_count))

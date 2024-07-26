@@ -18,9 +18,10 @@ import time
 from queue import Empty, Full, Queue
 
 from apscheduler.schedulers.background import BackgroundScheduler
+from mpi4py import MPI
 
-from grps_framework.logger.logger import logger
 from grps_framework.conf.conf import global_conf
+from grps_framework.logger.logger import logger
 
 
 class AggType(object):
@@ -419,6 +420,12 @@ class Monitor(object):
     def __dump_metrics(self):
         """Dump metrics to file and update every second."""
         monitor_log_path = os.path.join(global_conf.server_conf['log']['log_dir'], 'grps_monitor.log')
+
+        comm = MPI.COMM_WORLD
+        world_rank = comm.Get_rank()
+
+        if world_rank > 0:
+            monitor_log_path += '-rank' + str(world_rank)
         with open(monitor_log_path, 'w+') as f:
             while self.__running:
                 # clear file content before write

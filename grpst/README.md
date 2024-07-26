@@ -85,20 +85,18 @@ optional arguments:
 ### 部署工程
 
 ```
-usage: grpst start [-h] [--name NAME] [--conf_path CONF_PATH]
-                   [--timeout TIMEOUT]
-                   mar_path
+usage: grpst start [-h] [--name NAME] [--conf_path CONF_PATH] [--timeout TIMEOUT] [--mpi_np MPI_NP] mar_path
 
 positional arguments:
   mar_path              model server archive path
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   --name NAME           server name, default is "my_grps"
   --conf_path CONF_PATH
-                        server conf path, will use server.yml in mar(mar_path
-                        arg) if not set
+                        server conf path, will use server.yml in mar(mar_path arg) if not set
   --timeout TIMEOUT     server start timeout, default is 300s
+  --mpi_np MPI_NP       mpi process count, default is 1 and will not use mpi.
 ```
 
 ### 快速部署tensorflow模型服务

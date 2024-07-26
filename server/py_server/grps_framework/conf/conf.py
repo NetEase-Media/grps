@@ -2,7 +2,6 @@
 # Author zhaochaochao@corp.netease.com
 # Date   2022/9/13
 # Brief  Global conf.
-import json
 import os
 
 import yaml

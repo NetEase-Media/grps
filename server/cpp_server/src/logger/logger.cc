@@ -9,20 +9,26 @@
 
 #include <thread>
 
+#include "config/global_config.h"
+
 namespace netease::grps {
 void DailyLogger::Init(const std::string& sys_log_path,
                        int sys_log_backup_count,
                        const std::string& usr_log_path,
                        int usr_log_backup_count) {
-  sys_log_path_ = sys_log_path;
-  usr_log_path_ = usr_log_path;
+  sys_log_path_ = GlobalConfig::Instance().mpi().world_rank > 0
+                    ? sys_log_path + "-rank" + std::to_string(GlobalConfig::Instance().mpi().world_rank)
+                    : sys_log_path;
+  usr_log_path_ = GlobalConfig::Instance().mpi().world_rank > 0
+                    ? usr_log_path + "-rank" + std::to_string(GlobalConfig::Instance().mpi().world_rank)
+                    : usr_log_path;
   sys_log_backup_count_ = sys_log_backup_count;
   usr_log_backup_count_ = usr_log_backup_count;
 
   sys_layout_ =
     log4cxx::PatternLayoutPtr(new log4cxx::PatternLayout("%d{yyyyMMdd HH:mm:ss.SSS} %t %-.30F:%L %p] %m%n"));
   sys_appender_ = log4cxx::DailyRollingFileAppenderPtr(
-    new log4cxx::DailyRollingFileAppender(sys_layout_, sys_log_path, ".yyyy-MM-dd"));
+    new log4cxx::DailyRollingFileAppender(sys_layout_, sys_log_path_, ".yyyy-MM-dd"));
   sys_appender_->setName("sys");
   sys_appender_->setAppend(true);
   sys_appender_->setImmediateFlush(true);
@@ -36,7 +42,7 @@ void DailyLogger::Init(const std::string& sys_log_path,
   usr_layout_ =
     log4cxx::PatternLayoutPtr(new log4cxx::PatternLayout("%d{yyyyMMdd HH:mm:ss.SSS} %t %-.30F:%L %p] %m%n"));
   usr_appender_ = log4cxx::DailyRollingFileAppenderPtr(
-    new log4cxx::DailyRollingFileAppender(usr_layout_, usr_log_path, ".yyyy-MM-dd"));
+    new log4cxx::DailyRollingFileAppender(usr_layout_, usr_log_path_, ".yyyy-MM-dd"));
   usr_appender_->setName("usr");
   usr_appender_->setAppend(true);
   usr_appender_->setImmediateFlush(true);
@@ -49,7 +55,7 @@ void DailyLogger::Init(const std::string& sys_log_path,
 
   StartCleaner(); // Start cleaner thread to clean periodically.
 
-  LOG4(INFO, "Daily logger initialized, sys_log_path: " << sys_log_path << ", usr_log_path: " << usr_log_path
+  LOG4(INFO, "Daily logger initialized, sys_log_path: " << sys_log_path_ << ", usr_log_path: " << usr_log_path_
                                                         << ", sys_log_backup_count: " << sys_log_backup_count
                                                         << ", usr_log_backup_count: " << usr_log_backup_count);
 }

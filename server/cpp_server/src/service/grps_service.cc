@@ -18,7 +18,7 @@
 #include "logger/logger.h"
 #include "monitor/monitor.h"
 
-#define HANDLER_PROCESS(FuncName)                                    \
+#define BRPC_HANDLER_PROCESS(FuncName)                               \
   {                                                                  \
     auto* cntl = dynamic_cast<brpc::Controller*>(controller);        \
     switch (handler_type_) {                                         \
@@ -51,7 +51,7 @@ void GrpsBrpcServiceImpl::Predict(::google::protobuf::RpcController* controller,
   boost::promise<void> promise;
   auto future = promise.get_future();
   boost::asio::post(*g_predict_threadpool, [&]() {
-    HANDLER_PROCESS(Predict);
+    BRPC_HANDLER_PROCESS(Predict);
     promise.set_value();
   });
   future.wait();
@@ -80,7 +80,7 @@ void GrpsBrpcServiceImpl::PredictByHttp(::google::protobuf::RpcController* contr
   boost::promise<void> promise;
   auto future = promise.get_future();
   boost::asio::post(*g_predict_threadpool, [&]() {
-    http_handler_.PredictByHttp(controller, request, response, done);
+    http_handler_.PredictByHttp(cntl, request, response, done);
     promise.set_value();
   });
   future.wait();
@@ -99,7 +99,7 @@ void GrpsBrpcServiceImpl::Online(::google::protobuf::RpcController* controller,
   brpc::ClosureGuard done_guard(done);
   auto remote_side = dynamic_cast<brpc::Controller*>(controller)->remote_side();
   LOG4(INFO, "[Online] from " << remote_side);
-  HANDLER_PROCESS(Online);
+  BRPC_HANDLER_PROCESS(Online);
 }
 
 void GrpsBrpcServiceImpl::Offline(::google::protobuf::RpcController* controller,
@@ -109,7 +109,7 @@ void GrpsBrpcServiceImpl::Offline(::google::protobuf::RpcController* controller,
   brpc::ClosureGuard done_guard(done);
   auto remote_side = dynamic_cast<brpc::Controller*>(controller)->remote_side();
   LOG4(INFO, "[Offline] from " << remote_side);
-  HANDLER_PROCESS(Offline);
+  BRPC_HANDLER_PROCESS(Offline);
 }
 
 void GrpsBrpcServiceImpl::CheckLiveness(::google::protobuf::RpcController* controller,
@@ -119,7 +119,7 @@ void GrpsBrpcServiceImpl::CheckLiveness(::google::protobuf::RpcController* contr
   brpc::ClosureGuard done_guard(done);
   auto remote_side = dynamic_cast<brpc::Controller*>(controller)->remote_side();
   LOG4(INFO, "[CheckLiveness] from " << remote_side);
-  HANDLER_PROCESS(CheckLiveness);
+  BRPC_HANDLER_PROCESS(CheckLiveness);
 }
 
 void GrpsBrpcServiceImpl::CheckReadiness(::google::protobuf::RpcController* controller,
@@ -129,7 +129,7 @@ void GrpsBrpcServiceImpl::CheckReadiness(::google::protobuf::RpcController* cont
   brpc::ClosureGuard done_guard(done);
   auto remote_side = dynamic_cast<brpc::Controller*>(controller)->remote_side();
   LOG4(INFO, "[CheckReadiness] from " << remote_side);
-  HANDLER_PROCESS(CheckReadiness);
+  BRPC_HANDLER_PROCESS(CheckReadiness);
 }
 
 void GrpsBrpcServiceImpl::ServerMetadata(::google::protobuf::RpcController* controller,
@@ -139,7 +139,7 @@ void GrpsBrpcServiceImpl::ServerMetadata(::google::protobuf::RpcController* cont
   brpc::ClosureGuard done_guard(done);
   auto remote_side = dynamic_cast<brpc::Controller*>(controller)->remote_side();
   LOG4(INFO, "[ServerMetadata] from " << remote_side);
-  HANDLER_PROCESS(ServerMetadata);
+  BRPC_HANDLER_PROCESS(ServerMetadata);
 }
 
 void GrpsBrpcServiceImpl::ModelMetadata(::google::protobuf::RpcController* controller,
@@ -149,7 +149,7 @@ void GrpsBrpcServiceImpl::ModelMetadata(::google::protobuf::RpcController* contr
   brpc::ClosureGuard done_guard(done);
   auto remote_side = dynamic_cast<brpc::Controller*>(controller)->remote_side();
   LOG4(INFO, "[ModelMetadata] from " << remote_side);
-  HANDLER_PROCESS(ModelMetadata);
+  BRPC_HANDLER_PROCESS(ModelMetadata);
 }
 
 ::grpc::Status GrpsGrpcServiceImpl::Predict(::grpc::ServerContext* context,
@@ -162,7 +162,7 @@ void GrpsBrpcServiceImpl::ModelMetadata(::google::protobuf::RpcController* contr
   boost::promise<void> promise;
   auto future = promise.get_future();
   boost::asio::post(*g_predict_threadpool, [&]() {
-    rpc_handler_.Predict(nullptr, request, response);
+    rpc_handler_.Predict(context, request, response);
     promise.set_value();
   });
   future.wait();
@@ -185,7 +185,7 @@ void GrpsBrpcServiceImpl::ModelMetadata(::google::protobuf::RpcController* contr
   boost::promise<void> promise;
   auto future = promise.get_future();
   boost::asio::post(*g_predict_threadpool, [&]() {
-    rpc_handler_.PredictStreaming(nullptr, request, writer);
+    rpc_handler_.PredictStreaming(context, request, writer);
     promise.set_value();
   });
   future.wait();

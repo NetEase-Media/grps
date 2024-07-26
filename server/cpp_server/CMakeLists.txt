@@ -183,6 +183,10 @@ if (TRT_ENABLE)
     message(STATUS "TRT_LIBRARIES: ${TRT_LIBRARIES}")
 endif ()
 
+find_package(MPI REQUIRED)
+message(STATUS "Using MPI_INCLUDE_PATH: ${MPI_INCLUDE_PATH}")
+message(STATUS "Using MPI_LIBRARIES: ${MPI_LIBRARIES}")
+
 string(REPLACE ";" " " CXXFLAGS "${CXXFLAGS}")
 string(APPEND CMAKE_CXX_FLAGS " ")
 string(APPEND CMAKE_CXX_FLAGS ${CXXFLAGS})
@@ -200,6 +204,7 @@ include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/src
         ${CMAKE_CURRENT_SOURCE_DIR}/second_party/grps_apis/cpp_gens
+        ${MPI_INCLUDE_PATH}
 )
 
 set(DEPEND_LINK_DIRECTORIES

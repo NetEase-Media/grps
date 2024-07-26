@@ -142,6 +142,11 @@ public:
     }
   };
 
+  struct MPIConfig {
+    int world_size;
+    int world_rank;
+  };
+
   static GlobalConfig& Instance() {
     static GlobalConfig instance;
     return instance;
@@ -155,6 +160,8 @@ public:
 
   [[nodiscard]] const ServerConfig& server_config() const { return server_config_; }
   [[nodiscard]] const InferenceConfig& inference_config() const { return inference_config_; }
+  [[nodiscard]] const MPIConfig& mpi() const { return mpi_; }
+  void set_mpi(const MPIConfig& mpi) { mpi_ = mpi; }
 
   bool Load(const std::string& server_conf_path = "./conf/server.yml",
             const std::string& inference_conf_path = "./conf/inference.yml");
@@ -164,6 +171,7 @@ private:
 
   ServerConfig server_config_;
   InferenceConfig inference_config_;
+  MPIConfig mpi_;
 
   bool LoadServerConf(const std::string& conf_path);
 

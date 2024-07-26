@@ -39,6 +39,7 @@ RUN apt update
 RUN apt install -y tzdata
 
 # install grps
+ENV LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH
 ADD deps.tar.gz /tmp/
 RUN cd /tmp/deps/ && \
     bash install.sh 0 1 0 && \

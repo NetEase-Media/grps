@@ -2,7 +2,7 @@
 # Copyright 2023 netease. All rights reserved.
 # Author zhaochaochao@corp.netease.com
 # Date   2023/9/28
-# Brief  grpc install.
+# Brief  eigen install.
 
 COLORRED="\033[31m"
 COLORGREEN="\033[32m"

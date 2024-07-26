@@ -255,6 +255,7 @@ private:
   boost::shared_mutex metrics_agg_mutex_;
   std::atomic<bool> running_;
   std::thread dump_metrics_agg_thread_;
+  std::string monitor_log_path_;
 
   Monitor() : metrics_agg_(), running_(false) {}
 

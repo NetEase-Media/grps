@@ -34,6 +34,8 @@ class GrpsProjectDeployer(object):
                                    help='server conf path, will use server.yml in mar(mar_path arg) if not set',
                                    required=False)
         parser_deploy.add_argument('--timeout', type=int, help='server start timeout, default is 300s', default=300)
+        parser_deploy.add_argument('--mpi_np', type=int, help='mpi process count, default is 1 and will not use mpi.',
+                                   default=1)
         parser_deploy.add_argument('mar_path', type=str, help='model server archive path')
         parser_deploy.set_defaults(func=self.deploy)  # Set default function.
 
@@ -222,18 +224,19 @@ class GrpsProjectDeployer(object):
             return False
         return True
 
-    def __start_server(self, timeout):
+    def __start_server(self, timeout, mpi_np):
         """
         Start server.
 
         Args:
             timeout: start timeout.
+            mpi_np: mpi np.
 
         Returns
             True for success, False for failed.
         """
         os.chdir(self.__grps_server_work_dir)
-        cmd_str = 'bash start_server.sh ' + str(timeout)
+        cmd_str = 'bash start_server.sh ' + str(timeout) + ' ' + str(mpi_np)
         ret = os.system(cmd_str)
         signal.signal(signal.SIGINT, signal.SIG_IGN)
         return ret == 0
@@ -276,7 +279,7 @@ class GrpsProjectDeployer(object):
         print('>>>> Preparing grps project finished')
 
         print('>>>> Starting grps server({})...'.format(args.name))
-        if not self.__start_server(args.timeout):
+        if not self.__start_server(args.timeout, args.mpi_np):
             print('Start grps server({}) failed'.format(args.name))
             utils.file_unlock(lock_file_fd, lock_file)
             return -1

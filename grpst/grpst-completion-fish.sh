@@ -32,6 +32,7 @@ complete -c grpst -n "__fish_seen_subcommand_from start" -a "-h" -d "show help"
 complete -c grpst -n "__fish_seen_subcommand_from start" -a "--name" -d "server name"
 complete -c grpst -n "__fish_seen_subcommand_from start" -a "--conf_path" -d "server config path"
 complete -c grpst -n "__fish_seen_subcommand_from start" -a "--timeout" -d "timeout"
+complete -c grpst -n "__fish_seen_subcommand_from start" -a "--mpi_np" -d "mpi process count"
 
 # Add argument completion for tf_serve subcommands
 complete -c grpst -n "__fish_seen_subcommand_from tf_serve" -a "--help" -d "show help"

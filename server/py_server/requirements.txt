@@ -9,3 +9,4 @@ setuptools>=68.0.0
 APScheduler>=3.10.4
 nest_asyncio>=1.5.8
 pynvml>=11.5.0
+mpi4py>=3.1.6

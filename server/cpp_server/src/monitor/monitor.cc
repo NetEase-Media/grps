@@ -274,7 +274,12 @@ void MetricsAgg::AggThreadFunc(const boost::system::error_code& ec) {
   timer_.async_wait([this](auto&& param) { AggThreadFunc(std::forward<decltype(param)>(param)); });
 }
 
-void Monitor::Init() {}
+void Monitor::Init() {
+  monitor_log_path_ = GlobalConfig::Instance().server_config().log.log_dir + "/grps_monitor.log";
+  if (GlobalConfig::Instance().mpi().world_rank > 0) {
+    monitor_log_path_ += "-rank" + std::to_string(GlobalConfig::Instance().mpi().world_rank);
+  }
+}
 
 void Monitor::PutMetricPiece(const netease::grps::MetricsPiece& metrics_piece) {
   if (!running_) {
@@ -345,8 +350,7 @@ std::vector<std::string> Monitor::GetMetricsNames() {
 }
 
 void Monitor::DumpMetricsAgg() {
-  std::string monitor_log_path = GlobalConfig::Instance().server_config().log.log_dir + "/grps_monitor.log";
-  auto fd = open(monitor_log_path.c_str(), O_CREAT | O_RDWR | O_TRUNC, 0644);
+  auto fd = open(monitor_log_path_.c_str(), O_CREAT | O_RDWR | O_TRUNC, 0644);
   if (fd < 0) {
     LOG4(ERROR, "open file failed");
   }

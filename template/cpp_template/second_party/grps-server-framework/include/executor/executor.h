@@ -47,7 +47,7 @@ public:
   void Init();
 
   /**
-   * @brief Infer.
+   * @brief Infer. Not safe for batching mode. Use Infer(input, output, ctx_sp, model_name) instead.
    * @param input: Input message from client.
    * @param output: Output message to client.
    * @param ctx: Context of current request.

@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <brpc/controller.h>
 #include <grpcpp/impl/codegen/sync_stream.h>
 
 #include "grps.brpc.pb.h"
@@ -18,31 +19,31 @@ public:
   GrpsHandler() = default;
   virtual ~GrpsHandler() = default;
 
-  virtual void Predict(::google::protobuf::RpcController* controller,
+  virtual void Predict(::brpc::Controller* controller,
                        const ::grps::protos::v1::GrpsMessage* request,
                        ::grps::protos::v1::GrpsMessage* response) = 0;
 
-  virtual void Online(::google::protobuf::RpcController* controller,
+  virtual void Online(::brpc::Controller* controller,
                       const ::grps::protos::v1::GrpsMessage* request,
                       ::grps::protos::v1::GrpsMessage* response) = 0;
 
-  virtual void Offline(::google::protobuf::RpcController* controller,
+  virtual void Offline(::brpc::Controller* controller,
                        const ::grps::protos::v1::GrpsMessage* request,
                        ::grps::protos::v1::GrpsMessage* response) = 0;
 
-  virtual void CheckLiveness(::google::protobuf::RpcController* controller,
+  virtual void CheckLiveness(::brpc::Controller* controller,
                              const ::grps::protos::v1::GrpsMessage* request,
                              ::grps::protos::v1::GrpsMessage* response) = 0;
 
-  virtual void CheckReadiness(::google::protobuf::RpcController* controller,
+  virtual void CheckReadiness(::brpc::Controller* controller,
                               const ::grps::protos::v1::GrpsMessage* request,
                               ::grps::protos::v1::GrpsMessage* response) = 0;
 
-  virtual void ServerMetadata(::google::protobuf::RpcController* controller,
+  virtual void ServerMetadata(::brpc::Controller* controller,
                               const ::grps::protos::v1::GrpsMessage* request,
                               ::grps::protos::v1::GrpsMessage* response) = 0;
 
-  virtual void ModelMetadata(::google::protobuf::RpcController* controller,
+  virtual void ModelMetadata(::brpc::Controller* controller,
                              const ::grps::protos::v1::GrpsMessage* request,
                              ::grps::protos::v1::GrpsMessage* response) = 0;
 };
@@ -60,35 +61,39 @@ public:
     return instance;
   }
 
-  void Predict(::google::protobuf::RpcController* controller,
+  void Predict(::brpc::Controller* controller,
                const ::grps::protos::v1::GrpsMessage* request,
                ::grps::protos::v1::GrpsMessage* response) override;
 
-  void PredictStreaming(::google::protobuf::RpcController* controller,
+  void Predict(::grpc::ServerContext* grpc_ctx,
+               const ::grps::protos::v1::GrpsMessage* request,
+               ::grps::protos::v1::GrpsMessage* response);
+
+  void PredictStreaming(::grpc::ServerContext* grpc_ctx,
                         const ::grps::protos::v1::GrpsMessage* request,
                         ::grpc::ServerWriter< ::grps::protos::v1::GrpsMessage>* writer);
 
-  void Online(::google::protobuf::RpcController* controller,
+  void Online(::brpc::Controller* controller,
               const ::grps::protos::v1::GrpsMessage* request,
               ::grps::protos::v1::GrpsMessage* response) override;
 
-  void Offline(::google::protobuf::RpcController* controller,
+  void Offline(::brpc::Controller* controller,
                const ::grps::protos::v1::GrpsMessage* request,
                ::grps::protos::v1::GrpsMessage* response) override;
 
-  void CheckLiveness(::google::protobuf::RpcController* controller,
+  void CheckLiveness(::brpc::Controller* controller,
                      const ::grps::protos::v1::GrpsMessage* request,
                      ::grps::protos::v1::GrpsMessage* response) override;
 
-  void CheckReadiness(::google::protobuf::RpcController* controller,
+  void CheckReadiness(::brpc::Controller* controller,
                       const ::grps::protos::v1::GrpsMessage* request,
                       ::grps::protos::v1::GrpsMessage* response) override;
 
-  void ServerMetadata(::google::protobuf::RpcController* controller,
+  void ServerMetadata(::brpc::Controller* controller,
                       const ::grps::protos::v1::GrpsMessage* request,
                       ::grps::protos::v1::GrpsMessage* response) override;
 
-  void ModelMetadata(::google::protobuf::RpcController* controller,
+  void ModelMetadata(::brpc::Controller* controller,
                      const ::grps::protos::v1::GrpsMessage* request,
                      ::grps::protos::v1::GrpsMessage* response) override;
 
@@ -109,36 +114,36 @@ public:
     return instance;
   }
 
-  void Predict(::google::protobuf::RpcController* controller,
+  void Predict(::brpc::Controller* controller,
                const ::grps::protos::v1::GrpsMessage* request,
                ::grps::protos::v1::GrpsMessage* response) override;
 
-  void PredictByHttp(::google::protobuf::RpcController* controller,
+  void PredictByHttp(::brpc::Controller* controller,
                      const ::grps::protos::v1::EmptyGrpsMessage* request,
                      ::grps::protos::v1::EmptyGrpsMessage* response,
                      ::google::protobuf::Closure* done);
 
-  void Online(::google::protobuf::RpcController* controller,
+  void Online(::brpc::Controller* controller,
               const ::grps::protos::v1::GrpsMessage* request,
               ::grps::protos::v1::GrpsMessage* response) override;
 
-  void Offline(::google::protobuf::RpcController* controller,
+  void Offline(::brpc::Controller* controller,
                const ::grps::protos::v1::GrpsMessage* request,
                ::grps::protos::v1::GrpsMessage* response) override;
 
-  void CheckLiveness(::google::protobuf::RpcController* controller,
+  void CheckLiveness(::brpc::Controller* controller,
                      const ::grps::protos::v1::GrpsMessage* request,
                      ::grps::protos::v1::GrpsMessage* response) override;
 
-  void CheckReadiness(::google::protobuf::RpcController* controller,
+  void CheckReadiness(::brpc::Controller* controller,
                       const ::grps::protos::v1::GrpsMessage* request,
                       ::grps::protos::v1::GrpsMessage* response) override;
 
-  void ServerMetadata(::google::protobuf::RpcController* controller,
+  void ServerMetadata(::brpc::Controller* controller,
                       const ::grps::protos::v1::GrpsMessage* request,
                       ::grps::protos::v1::GrpsMessage* response) override;
 
-  void ModelMetadata(::google::protobuf::RpcController* controller,
+  void ModelMetadata(::brpc::Controller* controller,
                      const ::grps::protos::v1::GrpsMessage* request,
                      ::grps::protos::v1::GrpsMessage* response) override;
 

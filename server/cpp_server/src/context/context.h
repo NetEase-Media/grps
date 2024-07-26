@@ -40,6 +40,7 @@
 #undef CHECK_GE
 #undef CHECK_GT
 
+#include <grpcpp/impl/codegen/server_context.h>
 #include <grpcpp/impl/codegen/sync_stream.h>
 
 #include <boost/thread.hpp>
@@ -61,11 +62,20 @@ public:
   explicit GrpsContext(const ::grps::protos::v1::GrpsMessage* request = nullptr,
                        ::grpc::ServerWriter<::grps::protos::v1::GrpsMessage>* rpc_stream_writer = nullptr,
                        butil::intrusive_ptr<brpc::ProgressiveAttachment>* http_stream_writer = nullptr,
-                       brpc::Controller* http_controller = nullptr)
+                       brpc::Controller* http_controller = nullptr,
+                       brpc::Controller* brpc_controller = nullptr,
+                       grpc::ServerContext* grpc_server_ctx = nullptr)
       : request_(request)
       , rpc_stream_writer_(rpc_stream_writer)
       , http_stream_writer_(http_stream_writer)
-      , http_controller_(http_controller) {}
+      , http_controller_(http_controller)
+      , brpc_controller_(brpc_controller)
+      , grpc_server_ctx_(grpc_server_ctx) {
+    if (http_stream_writer_ != nullptr) {
+      auto* http_stream_writer_close = google::protobuf::NewCallback(this, &GrpsContext::HttpStreamingWriterCloseCb);
+      http_stream_writer_->get()->NotifyOnStopped(http_stream_writer_close);
+    }
+  }
 
   ~GrpsContext() {
     std::lock_guard<std::mutex> lock(user_data_mutex_);
@@ -156,7 +166,7 @@ public:
 
   // ---------------------------- Customized http function. ----------------------------
 
-  // Get http_controller. Only used when using customized predict http. Otherwise, is nullptr.
+  // Get http_controller. Only used when using http interface. Otherwise, is nullptr.
   // Not that if using streaming request, user should use CustomizedHttpStreamingRespond to respond.
   // -------- Get request --------
   // Get content type as follows:
@@ -212,6 +222,18 @@ public:
   // Get model inferer.
   [[nodiscard]] ModelInferer* inferer() const { return model_inferer_; }
 
+  // Get grpc server context. Only used when using grpc interface. Otherwise, is nullptr.
+  [[nodiscard]] grpc::ServerContext* grpc_server_ctx() const { return grpc_server_ctx_; }
+
+  // Get brpc controller. Only used when using brpc interface. Otherwise, is nullptr.
+  [[nodiscard]] brpc::Controller* brpc_controller() const { return brpc_controller_; }
+
+  // [Only call by grps framework] Http streaming writer close callback.
+  void HttpStreamingWriterCloseCb() { http_streaming_writer_close_ = true; }
+
+  // If connection with client is broken.
+  [[nodiscard]] bool IfDisconnected();
+
 private:
   // request.
   const ::grps::protos::v1::GrpsMessage* request_;
@@ -221,9 +243,16 @@ private:
   butil::intrusive_ptr<brpc::ProgressiveAttachment>* http_stream_writer_;
   bool streaming_end_ = false;
   std::mutex streaming_mutex_;
+  std::atomic<bool> http_streaming_writer_close_ = false;
 
-  // http controller, only used when using customized predict http. Otherwise, is nullptr.
+  // http controller, Only used when using http interface. Otherwise, is nullptr.
   brpc::Controller* http_controller_;
+
+  // brpc controller, Only used when using brpc interface. Otherwise, is nullptr.
+  brpc::Controller* brpc_controller_;
+
+  // grpc server context. Only used when using grpc interface. Otherwise, is nullptr.
+  grpc::ServerContext* grpc_server_ctx_;
 
   // user data.
   void* user_data_ = nullptr;

@@ -37,7 +37,7 @@ static inline void SetStatus(::grps::protos::v1::GrpsMessage* response,
   mutable_status->set_status(status);
 }
 
-void GrpsRpcHandler::Predict(::google::protobuf::RpcController* controller,
+void GrpsRpcHandler::Predict(::brpc::Controller* controller,
                              const ::grps::protos::v1::GrpsMessage* request,
                              ::grps::protos::v1::GrpsMessage* response) {
 #ifdef GRPS_DEBUG
@@ -45,7 +45,8 @@ void GrpsRpcHandler::Predict(::google::protobuf::RpcController* controller,
 #endif
 
   try {
-    std::shared_ptr<GrpsContext> ctx_sp = std::make_shared<GrpsContext>(request);
+    std::shared_ptr<GrpsContext> ctx_sp =
+      std::make_shared<GrpsContext>(request, nullptr, nullptr, nullptr, controller, nullptr);
     auto& ctx = *ctx_sp;
     Executor::Instance().Infer(*request, *response, ctx_sp, request->model());
     if (ctx.has_err()) {
@@ -69,7 +70,40 @@ void GrpsRpcHandler::Predict(::google::protobuf::RpcController* controller,
   }
 }
 
-void GrpsRpcHandler::PredictStreaming(::google::protobuf::RpcController* controller,
+void GrpsRpcHandler::Predict(::grpc::ServerContext* grpc_ctx,
+                             const ::grps::protos::v1::GrpsMessage* request,
+                             ::grps::protos::v1::GrpsMessage* response) {
+#ifdef GRPS_DEBUG
+  LOG4(INFO, "Predict");
+#endif
+
+  try {
+    std::shared_ptr<GrpsContext> ctx_sp =
+      std::make_shared<GrpsContext>(request, nullptr, nullptr, nullptr, nullptr, grpc_ctx);
+    auto& ctx = *ctx_sp;
+    Executor::Instance().Infer(*request, *response, ctx_sp, request->model());
+    if (ctx.has_err()) {
+      SetStatus(response, brpc::HTTP_STATUS_INTERNAL_SERVER_ERROR, ctx.err_msg(), ::grps::protos::v1::Status::FAILURE);
+      MONITOR_AVG(REQ_FAIL_RATE, 100);
+      LOG4(ERROR, "Predict failed: " << ctx.err_msg());
+    } else {
+      MONITOR_AVG(REQ_FAIL_RATE, 0);
+      SetStatus(response, brpc::HTTP_STATUS_OK, "OK", ::grps::protos::v1::Status::SUCCESS);
+    }
+  } catch (const std::exception& e) {
+    LOG4(ERROR, "Predict failed: " << e.what());
+    std::string err_msg = e.what();
+#ifdef GRPS_CUDA_ENABLE
+    if (err_msg.find("CUDA out of memory") != std::string::npos || err_msg.find("OOM") != std::string::npos) {
+      MONITOR_INC(GPU_OOM_COUNT, 1);
+    }
+#endif
+    MONITOR_AVG(REQ_FAIL_RATE, 100);
+    SetStatus(response, brpc::HTTP_STATUS_INTERNAL_SERVER_ERROR, e.what(), ::grps::protos::v1::Status::FAILURE);
+  }
+}
+
+void GrpsRpcHandler::PredictStreaming(::grpc::ServerContext* grpc_ctx,
                                       const ::grps::protos::v1::GrpsMessage* request,
                                       ::grpc::ServerWriter<::grps::protos::v1::GrpsMessage>* writer) {
 #ifdef GRPS_DEBUG
@@ -78,7 +112,7 @@ void GrpsRpcHandler::PredictStreaming(::google::protobuf::RpcController* control
 
   ::grps::protos::v1::GrpsMessage response;
   try {
-    auto ctx_sp = std::make_shared<GrpsContext>(request, writer);
+    auto ctx_sp = std::make_shared<GrpsContext>(request, writer, nullptr, nullptr, nullptr, grpc_ctx);
     Executor::Instance().Infer(*request, response, ctx_sp, request->model());
     if (ctx_sp->has_err()) {
       SetStatus(&response, brpc::HTTP_STATUS_INTERNAL_SERVER_ERROR, ctx_sp->err_msg(),
@@ -103,27 +137,27 @@ void GrpsRpcHandler::PredictStreaming(::google::protobuf::RpcController* control
   writer->Write(response);
 }
 
-void GrpsRpcHandler::Online(::google::protobuf::RpcController* controller,
+void GrpsRpcHandler::Online(::brpc::Controller* controller,
                             const ::grps::protos::v1::GrpsMessage* request,
                             ::grps::protos::v1::GrpsMessage* response) {
   online_status = true;
   SetStatus(response, brpc::HTTP_STATUS_OK, "OK", ::grps::protos::v1::Status::SUCCESS);
 }
 
-void GrpsRpcHandler::Offline(::google::protobuf::RpcController* controller,
+void GrpsRpcHandler::Offline(::brpc::Controller* controller,
                              const ::grps::protos::v1::GrpsMessage* request,
                              ::grps::protos::v1::GrpsMessage* response) {
   online_status = false;
   SetStatus(response, brpc::HTTP_STATUS_OK, "OK", ::grps::protos::v1::Status::SUCCESS);
 }
 
-void GrpsRpcHandler::CheckLiveness(::google::protobuf::RpcController* controller,
+void GrpsRpcHandler::CheckLiveness(::brpc::Controller* controller,
                                    const ::grps::protos::v1::GrpsMessage* request,
                                    ::grps::protos::v1::GrpsMessage* response) {
   SetStatus(response, brpc::HTTP_STATUS_OK, "OK", ::grps::protos::v1::Status::SUCCESS);
 }
 
-void GrpsRpcHandler::CheckReadiness(::google::protobuf::RpcController* controller,
+void GrpsRpcHandler::CheckReadiness(::brpc::Controller* controller,
                                     const ::grps::protos::v1::GrpsMessage* request,
                                     ::grps::protos::v1::GrpsMessage* response) {
   if (online_status) {
@@ -134,7 +168,7 @@ void GrpsRpcHandler::CheckReadiness(::google::protobuf::RpcController* controlle
   }
 }
 
-void GrpsRpcHandler::ServerMetadata(::google::protobuf::RpcController* controller,
+void GrpsRpcHandler::ServerMetadata(::brpc::Controller* controller,
                                     const ::grps::protos::v1::GrpsMessage* request,
                                     ::grps::protos::v1::GrpsMessage* response) {
   std::fstream input("./conf/server.yml", std::ios::in);
@@ -150,7 +184,7 @@ void GrpsRpcHandler::ServerMetadata(::google::protobuf::RpcController* controlle
   response->mutable_str_data()->append(meta_pure);
 }
 
-void GrpsRpcHandler::ModelMetadata(::google::protobuf::RpcController* controller,
+void GrpsRpcHandler::ModelMetadata(::brpc::Controller* controller,
                                    const ::grps::protos::v1::GrpsMessage* request,
                                    ::grps::protos::v1::GrpsMessage* response) {
   const std::string& model_name = request->str_data();
@@ -177,18 +211,17 @@ void GrpsRpcHandler::ModelMetadata(::google::protobuf::RpcController* controller
   }
 }
 
-void GrpsHttpHandler::Predict(::google::protobuf::RpcController* controller,
+void GrpsHttpHandler::Predict(::brpc::Controller* cntl,
                               const ::grps::protos::v1::GrpsMessage* request,
                               ::grps::protos::v1::GrpsMessage* response) {
 #ifdef GRPS_DEBUG
   LOG4(INFO, "Predict");
 #endif
-  auto* cntl = dynamic_cast<brpc::Controller*>(controller);
   const auto& content_type = cntl->http_request().content_type();
 
   // Predict.
   try {
-    std::shared_ptr<GrpsContext> ctx_sp = std::make_shared<GrpsContext>(request);
+    std::shared_ptr<GrpsContext> ctx_sp = std::make_shared<GrpsContext>(request, nullptr, nullptr, cntl);
     auto& ctx = *ctx_sp;
     Executor::Instance().Infer(*request, *response, ctx_sp, request->model());
     if (ctx.has_err()) {
@@ -422,7 +455,7 @@ static void CustomizedPredictHttp(brpc::Controller* cntl,
   }
 }
 
-void GrpsHttpHandler::PredictByHttp(::google::protobuf::RpcController* controller,
+void GrpsHttpHandler::PredictByHttp(::brpc::Controller* cntl,
                                     const ::grps::protos::v1::EmptyGrpsMessage* request,
                                     ::grps::protos::v1::EmptyGrpsMessage* response,
                                     ::google::protobuf::Closure* done) {
@@ -431,7 +464,6 @@ void GrpsHttpHandler::PredictByHttp(::google::protobuf::RpcController* controlle
 #endif
   brpc::ClosureGuard done_guard(done);
 
-  auto* cntl = dynamic_cast<brpc::Controller*>(controller);
   const auto& content_type = cntl->http_request().content_type();
 
   // Check if streaming request.
@@ -602,7 +634,7 @@ void GrpsHttpHandler::PredictByHttp(::google::protobuf::RpcController* controlle
   // Predict.
   bool has_err = false;
   try {
-    auto ctx_sp = std::make_shared<GrpsContext>(&true_req, nullptr, nullptr);
+    auto ctx_sp = std::make_shared<GrpsContext>(&true_req, nullptr, nullptr, cntl);
     auto& ctx = *ctx_sp;
     Executor::Instance().Infer(true_req, true_res, ctx_sp, model);
     if (ctx.has_err()) {
@@ -699,36 +731,33 @@ void GrpsHttpHandler::PredictByHttp(::google::protobuf::RpcController* controlle
   }
 }
 
-void GrpsHttpHandler::Online(::google::protobuf::RpcController* controller,
+void GrpsHttpHandler::Online(::brpc::Controller* cntl,
                              const ::grps::protos::v1::GrpsMessage* request,
                              ::grps::protos::v1::GrpsMessage* response) {
   online_status = true;
   SetStatus(response, brpc::HTTP_STATUS_OK, "OK", ::grps::protos::v1::Status::SUCCESS);
-  auto* cntl = dynamic_cast<brpc::Controller*>(controller);
   cntl->http_response().set_content_type("application/json");
   cntl->response_attachment().append(Pb2json(*response));
 }
 
-void GrpsHttpHandler::Offline(::google::protobuf::RpcController* controller,
+void GrpsHttpHandler::Offline(::brpc::Controller* cntl,
                               const ::grps::protos::v1::GrpsMessage* request,
                               ::grps::protos::v1::GrpsMessage* response) {
   online_status = false;
   SetStatus(response, brpc::HTTP_STATUS_OK, "OK", ::grps::protos::v1::Status::SUCCESS);
-  auto* cntl = dynamic_cast<brpc::Controller*>(controller);
   cntl->http_response().set_content_type("application/json");
   cntl->response_attachment().append(Pb2json(*response));
 }
 
-void GrpsHttpHandler::CheckLiveness(::google::protobuf::RpcController* controller,
+void GrpsHttpHandler::CheckLiveness(::brpc::Controller* cntl,
                                     const ::grps::protos::v1::GrpsMessage* request,
                                     ::grps::protos::v1::GrpsMessage* response) {
   SetStatus(response, brpc::HTTP_STATUS_OK, "OK", ::grps::protos::v1::Status::SUCCESS);
-  auto* cntl = dynamic_cast<brpc::Controller*>(controller);
   cntl->http_response().set_content_type("application/json");
   cntl->response_attachment().append(Pb2json(*response));
 }
 
-void GrpsHttpHandler::CheckReadiness(::google::protobuf::RpcController* controller,
+void GrpsHttpHandler::CheckReadiness(::brpc::Controller* cntl,
                                      const ::grps::protos::v1::GrpsMessage* request,
                                      ::grps::protos::v1::GrpsMessage* response) {
   if (online_status) {
@@ -737,12 +766,11 @@ void GrpsHttpHandler::CheckReadiness(::google::protobuf::RpcController* controll
     SetStatus(response, brpc::HTTP_STATUS_SERVICE_UNAVAILABLE, "Service Unavailable",
               ::grps::protos::v1::Status::FAILURE);
   }
-  auto* cntl = dynamic_cast<brpc::Controller*>(controller);
   cntl->http_response().set_content_type("application/json");
   cntl->response_attachment().append(Pb2json(*response));
 }
 
-void GrpsHttpHandler::ServerMetadata(::google::protobuf::RpcController* controller,
+void GrpsHttpHandler::ServerMetadata(::brpc::Controller* cntl,
                                      const ::grps::protos::v1::GrpsMessage* request,
                                      ::grps::protos::v1::GrpsMessage* response) {
   std::fstream input("./conf/server.yml", std::ios::in);
@@ -757,12 +785,11 @@ void GrpsHttpHandler::ServerMetadata(::google::protobuf::RpcController* controll
   response->mutable_str_data()->append("\n");
   response->mutable_str_data()->append(meta_pure);
   SetStatus(response, brpc::HTTP_STATUS_OK, "OK", ::grps::protos::v1::Status::SUCCESS);
-  auto* cntl = dynamic_cast<brpc::Controller*>(controller);
   cntl->http_response().set_content_type("application/json");
   cntl->response_attachment().append(Pb2json(*response));
 }
 
-void GrpsHttpHandler::ModelMetadata(::google::protobuf::RpcController* controller,
+void GrpsHttpHandler::ModelMetadata(::brpc::Controller* cntl,
                                     const ::grps::protos::v1::GrpsMessage* request,
                                     ::grps::protos::v1::GrpsMessage* response) {
   const std::string& model_name = request->str_data();
@@ -780,7 +807,6 @@ void GrpsHttpHandler::ModelMetadata(::google::protobuf::RpcController* controlle
     break;
   }
 
-  auto* cntl = dynamic_cast<brpc::Controller*>(controller);
   if (model_meta.empty()) {
     SetStatus(response, brpc::HTTP_STATUS_NOT_FOUND, "Not Found", ::grps::protos::v1::Status::FAILURE);
     cntl->http_response().set_content_type("application/json");

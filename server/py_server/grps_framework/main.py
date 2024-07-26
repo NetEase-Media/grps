@@ -6,22 +6,29 @@ import os
 import re
 import sys
 import threading
+import time
 import traceback
 from concurrent import futures
 from constant import GRPS_VERSION
+from mpi4py import MPI
+
+comm = MPI.COMM_WORLD
+world_size = comm.Get_size()
+world_rank = comm.Get_rank()
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Dump PID.
-with open('PID', 'w') as f:
-    # f.write(str(os.getpid()) + ' ' + str(os.getppid()))
-    f.write(str(os.getpid()))
-    f.flush()
+if world_rank == 0:
+    # Dump PID.
+    with open('PID', 'w') as f:
+        # f.write(str(os.getpid()) + ' ' + str(os.getppid()))
+        f.write(str(os.getpid()))
+        f.flush()
 
-# Dump VERSION.
-with open('VERSION', 'w') as f:
-    f.write(GRPS_VERSION)
-    f.flush()
+    # Dump VERSION.
+    with open('VERSION', 'w') as f:
+        f.write(GRPS_VERSION)
+        f.flush()
 
 try:
     from grps_framework.conf.conf import global_conf
@@ -113,6 +120,10 @@ try:
     from grps_framework.executor.executor import Executor
 
     executor = Executor()
+
+    if world_rank > 0:  # Worker process, wait forever.
+        while True:
+            time.sleep(100)
 
     # Init system metrics monitor.
     app_monitor.inc(QPS, 0)

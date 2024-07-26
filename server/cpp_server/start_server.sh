@@ -9,10 +9,16 @@ COLORSKYBLUE="\033[36m"
 COLORWHITE="\033[37m"
 COLOREND="\033[0m"
 
-timeout=$1 # 超时时间，单位秒
+timeout=$1 # timeout in seconds
 # Default timeout is 60s.
 if [ -z "$timeout" ]; then
   timeout=60
+fi
+
+rank_size=$2 # mpi rank size
+# Default rank_size is 1.
+if [ -z "$rank_size" ]; then
+  rank_size=1
 fi
 
 if ! command -v lsof >/dev/null 2>&1; then
@@ -82,13 +88,13 @@ else
   # clear old logs.
   echo -e "${COLORYELLOW}[WARNING]$COLOREND $log_dir already exist, clearing ${log_dir}/grps_server.log ${log_dir}/grps_usr.log ${log_dir}/grps_monitor.log ..."
   if [ -e "${log_dir}/grps_server.log" ]; then
-    rm "${log_dir}"/grps_server.log
+    rm "${log_dir}"/grps_server.log*
   fi
   if [ -e "${log_dir}/grps_usr.log" ]; then
-    rm "${log_dir}"/grps_usr.log
+    rm "${log_dir}"/grps_usr.log*
   fi
   if [ -e "${log_dir}/grps_monitor.log" ]; then
-    rm "${log_dir}"/grps_monitor.log
+    rm "${log_dir}"/grps_monitor.log*
   fi
 fi
 
@@ -104,12 +110,16 @@ fi
 start_time_str=$(date '+%Y%m%d_%H:%M:%S')
 echo "Starting server in $mode mode..."
 # Add libjemalloc.so to LD_PRELOAD to avoid memory fragmentation.
-# libjemalloc_path="/usr/local/lib/libjemalloc.so"
-# if [ -e "$libjemalloc_path" ]; then
-#   export LD_PRELOAD=$libjemalloc_path
-#   echo "Start server with libjemalloc."
-# fi
-env LD_LIBRARY_PATH=./lib:$LD_LIBRARY_PATH nohup ./bin/grps_server &
+libjemalloc_path="/usr/local/lib/libjemalloc.so"
+if [ -e "$libjemalloc_path" ]; then
+  export LD_PRELOAD=$libjemalloc_path
+  echo "Start server with libjemalloc."
+fi
+if [ $rank_size -gt 1 ]; then
+  mpirun --allow-run-as-root -np $rank_size -H localhost:$rank_size env LD_LIBRARY_PATH=./lib:$LD_LIBRARY_PATH nohup ./bin/grps_server &
+else
+  env LD_LIBRARY_PATH=./lib:$LD_LIBRARY_PATH nohup ./bin/grps_server &
+fi
 
 # Loop check server status.
 # clear http and https proxy
@@ -161,7 +171,7 @@ while true; do
       exit 1
     fi
   else
-    if [ "$retry" -ge 2 ]; then
+    if [ "$retry" -ge 5 ]; then
       echo -e "${COLORRED}[START ERROR]$COLOREND No server process. Maybe conf is invalid or env is not satisfied or you can try again."
       tail -30 nohup.out
       exit 1

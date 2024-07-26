@@ -44,6 +44,7 @@ target_link_libraries(unit_test PUBLIC
         grps-server-customized
         libgrps-server-framework.a
         "-Wl,--no-whole-archive"
+        ${MPI_LIBRARIES}
         brpc
         grpc++_unsecure
         gtest

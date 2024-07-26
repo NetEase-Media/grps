@@ -122,4 +122,18 @@ void GrpsContext::BatcherPromiseNotify() {
     },
     promise_notified_flag_);
 }
+
+bool GrpsContext::IfDisconnected() {
+  if (http_stream_writer_ != nullptr) {
+    return http_streaming_writer_close_;
+  } else if (http_controller_ != nullptr) {
+    return http_controller_->IsCanceled();
+  } else if (brpc_controller_ != nullptr) {
+    return brpc_controller_->IsCanceled();
+  } else if (grpc_server_ctx_ != nullptr) {
+    return grpc_server_ctx_->IsCancelled();
+  } else {
+    return false;
+  }
+}
 } // namespace netease::grps
