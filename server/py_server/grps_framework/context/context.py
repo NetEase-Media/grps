@@ -128,7 +128,10 @@ class GrpsContext(object):
                 except GeneratorExit as e:
                     self._if_disconnected = True
             elif isinstance(msg, str) or isinstance(msg, bytes):
-                yield msg
+                try:
+                    yield msg
+                except GeneratorExit as e:
+                    self._if_disconnected = True
 
     def start_http_streaming_generator(self):
         """
