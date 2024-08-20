@@ -398,7 +398,8 @@ static void CustomizedPredictHttp(brpc::Controller* cntl,
   ::grps::protos::v1::GrpsMessage res;
 
   if (is_streaming) {
-    cntl->http_response().set_content_type("application/octet-stream");
+    cntl->http_response().set_content_type(
+      GlobalConfig::Instance().server_config().interface.customized_predict_http.streaming_ctrl.res_content_type);
     // done_guard reset will clear cntl->request_attachment(), so we need to save it.
     butil::IOBuf tmp;
     tmp.append(cntl->request_attachment().movable());
@@ -455,6 +456,46 @@ static void CustomizedPredictHttp(brpc::Controller* cntl,
   }
 }
 
+static bool IfHttpStreaming(::brpc::Controller* cntl) {
+  bool is_streaming = false;
+  auto& streaming_ctrl = GlobalConfig::Instance().server_config().interface.customized_predict_http.streaming_ctrl;
+  if (streaming_ctrl.ctrl_mode == GlobalConfig::ServerConfig::StreamingCtrlMode::kQueryParam) {
+    auto streaming_query_arg = cntl->http_request().uri().GetQuery(streaming_ctrl.ctrl_key);
+    if (streaming_query_arg != nullptr) {
+      // to lower
+      std::string streaming_query_arg_lower;
+      std::transform(streaming_query_arg->begin(), streaming_query_arg->end(),
+                     std::back_inserter(streaming_query_arg_lower), ::tolower);
+      if (streaming_query_arg_lower == "true") {
+        is_streaming = true;
+      }
+    }
+  } else if (streaming_ctrl.ctrl_mode == GlobalConfig::ServerConfig::StreamingCtrlMode::kHeaderParam) {
+    auto streaming_header = cntl->http_request().GetHeader(streaming_ctrl.ctrl_key);
+    if (streaming_header != nullptr) {
+      // to lower
+      std::string streaming_header_lower;
+      std::transform(streaming_header->begin(), streaming_header->end(), std::back_inserter(streaming_header_lower),
+                     ::tolower);
+      if (streaming_header_lower == "true") {
+        is_streaming = true;
+      }
+    }
+  } else if (streaming_ctrl.ctrl_mode == GlobalConfig::ServerConfig::StreamingCtrlMode::kBodyParam) {
+    rapidjson::Document body_doc;
+    body_doc.Parse(cntl->request_attachment().to_string().c_str());
+    if (body_doc.HasParseError()) {
+      LOG4(ERROR, "Parse json failed: " << body_doc.GetParseError());
+      return false;
+    }
+    auto streaming_body = body_doc.FindMember(streaming_ctrl.ctrl_key.c_str());
+    if (streaming_body != body_doc.MemberEnd() && streaming_body->value.IsBool() && streaming_body->value.GetBool()) {
+      is_streaming = true;
+    }
+  }
+  return is_streaming;
+}
+
 void GrpsHttpHandler::PredictByHttp(::brpc::Controller* cntl,
                                     const ::grps::protos::v1::EmptyGrpsMessage* request,
                                     ::grps::protos::v1::EmptyGrpsMessage* response,
@@ -467,17 +508,19 @@ void GrpsHttpHandler::PredictByHttp(::brpc::Controller* cntl,
   const auto& content_type = cntl->http_request().content_type();
 
   // Check if streaming request.
-  bool is_streaming = false;
-  auto streaming_query_arg = cntl->http_request().uri().GetQuery("streaming");
-  if (streaming_query_arg != nullptr && *streaming_query_arg == "true") {
-    is_streaming = true;
-  }
+  bool is_streaming = IfHttpStreaming(cntl);
 
   // Check if ret ndarray.
   bool ret_ndarray = false;
   auto ret_ndarray_query_arg = cntl->http_request().uri().GetQuery("return-ndarray");
-  if (ret_ndarray_query_arg != nullptr && *ret_ndarray_query_arg == "true") {
-    ret_ndarray = true;
+  if (ret_ndarray_query_arg != nullptr) {
+    // to lower
+    std::string ret_ndarray_query_arg_lower;
+    std::transform(ret_ndarray_query_arg->begin(), ret_ndarray_query_arg->end(),
+                   std::back_inserter(ret_ndarray_query_arg_lower), ::tolower);
+    if (ret_ndarray_query_arg_lower == "true") {
+      ret_ndarray = true;
+    }
   }
 
   // Get model arg.
@@ -600,7 +643,8 @@ void GrpsHttpHandler::PredictByHttp(::brpc::Controller* cntl,
   auto true_res_ptr = std::make_unique<::grps::protos::v1::GrpsMessage>();
   auto& true_res = *true_res_ptr;
   if (is_streaming) {
-    cntl->http_response().set_content_type("application/octet-stream");
+    cntl->http_response().set_content_type(
+      GlobalConfig::Instance().server_config().interface.customized_predict_http.streaming_ctrl.res_content_type);
     auto pa = cntl->CreateProgressiveAttachment();
     done_guard.reset(nullptr);
     auto ctx_sp = std::make_shared<GrpsContext>(&true_req, nullptr, &pa, cntl);

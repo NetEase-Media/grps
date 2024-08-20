@@ -8,14 +8,49 @@ add_library(grps-server-customized SHARED
 )
 
 set(THIRD_PARTY_LIB_DIR ${CMAKE_SOURCE_DIR}/third_party/lib/)
-target_link_directories(grps-server-customized BEFORE PUBLIC ${THIRD_PARTY_LIB_DIR})
-target_link_libraries(grps-server-customized PUBLIC
-        # add third party lib.
+target_link_directories(grps-server-customized BEFORE PRIVATE ${DEPEND_LINK_DIRECTORIES} ${THIRD_PARTY_LIB_DIR})
+target_link_libraries(grps-server-customized PRIVATE
+        libgrps-server-framework.a
+        ${MPI_LIBRARIES}
+        brpc
+        grpc++_unsecure
+        gtest
+        protobuf
+        yaml-cpp
+        log4cxx
+        aprutil-1
+        apr-1
+        pthread
+        boost_system
+        boost_thread
+        dl
+
+        # add more third party lib.
 )
 
 if (CUDA_ENABLE)
+    target_link_libraries(grps-server-customized PRIVATE ${CUDA_LIBRARIES} ${CUDA_NVML_LIBRARIES})
     set_target_properties(grps-server-customized PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 endif ()
+if (TF_ENABLE)
+    target_link_directories(grps-server-customized BEFORE PUBLIC ${TF_LIB_DIR})
+    target_link_libraries(grps-server-customized PRIVATE ${TF_LIBRARIES})
+endif ()
+if (TORCH_ENABLE)
+    target_link_libraries(grps-server-customized PRIVATE ${TORCH_LIBRARIES})
+endif ()
+if (TRT_ENABLE)
+    target_link_libraries(grps-server-customized PRIVATE ${TRT_LIBRARIES})
+endif ()
+
+set_target_properties(
+        grps-server-customized
+        PROPERTIES
+        POSITION_INDEPENDENT_CODE ON
+        OUTPUT_NAME grps-server-customized
+        LINK_FLAGS
+        "-Wl,--no-undefined"
+)
 
 # install grps-server-customized lib.
 install(TARGETS grps-server-customized

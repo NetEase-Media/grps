@@ -30,7 +30,8 @@ complete -c grpst -n "__fish_seen_subcommand_from archive" -a "--output_path" -d
 complete -c grpst -n "__fish_seen_subcommand_from start" -a "--help" -d "show help"
 complete -c grpst -n "__fish_seen_subcommand_from start" -a "-h" -d "show help"
 complete -c grpst -n "__fish_seen_subcommand_from start" -a "--name" -d "server name"
-complete -c grpst -n "__fish_seen_subcommand_from start" -a "--conf_path" -d "server config path"
+complete -c grpst -n "__fish_seen_subcommand_from start" -a "--inference_conf" -d "inference config path"
+complete -c grpst -n "__fish_seen_subcommand_from start" -a "--server_conf" -d "server config path"
 complete -c grpst -n "__fish_seen_subcommand_from start" -a "--timeout" -d "timeout"
 complete -c grpst -n "__fish_seen_subcommand_from start" -a "--mpi_np" -d "mpi process count"
 

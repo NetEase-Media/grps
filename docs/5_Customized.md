@@ -305,7 +305,7 @@ class MyTestCase(GrpsTest):
 
 #### 7. 数据文件
 
-将数据文件放在data目录下，服务打包时会自动打包到mar文件中。
+将数据文件放在data目录下，服务打包时会自动打包到mar文件中。如果数据文件包含链接文件，请使用全路径创建软链接。
 
 ### cpp自定义工程
 
@@ -508,7 +508,7 @@ target_link_libraries(grps-server-customized PUBLIC
 
 #### 7. 数据文件
 
-将数据文件放在data目录下，服务打包时会自动打包到mar文件中。
+将数据文件放在data目录下，服务打包时会自动打包到mar文件中。如果数据文件包含链接文件，请使用全路径创建软链接。
 
 ### torch/tensorflow/tensorrt tensor与generic tensor互相转换
 
@@ -581,7 +581,22 @@ context.set_err_msg("your error message");
 
 #### 3. streaming流式返回
 
-当请求为streaming模式请求时，可以调用相关函数进行流式返回。
+##### 配置streaming模式控制方式
+
+```yaml
+streaming_ctrl: # user can control if streaming and response content type.
+  ctrl_mode: # `query_param`, `header_param` or `body_param`(only json body is supported). If not set, will use `query_param`.
+  ctrl_key: # key of control parameter. If not set, will use `streaming`. (`ctrl_key`=true) means streaming.
+  res_content_type: # response content type. If not set, will use `application/octet-stream`.
+```
+
+当前还不支持完全自定义streaming的开关控制方式，提供几种控制方式供选择。
+默认情况下，streaming模式会根据```query```参数中带有```streaming=true```参数来判断。
+通过修改```ctrl_mode```可以选择```query_param```、```header_param```或```body_param```（仅支持json
+body）来控制streaming模式开关。通过修改```ctrl_key```可以选择控制参数的key，默认为```streaming```。
+默认情况下，streaming返回类型为```application/octet-stream```，通过修改```res_content_type```可以选择返回的content type。
+
+##### 调用相关函数进行流式返回
 
 python：
 
@@ -743,6 +758,10 @@ interface:
   #customized_predict_http: # customized predict http config. If you want to enable it, please uncomment this section.
   #  path: /custom_predict # customized predict http path.
   #  customized_body: true # whether to use customized predict http body. If true, user should parse request and build response themselves.
+  #  streaming_ctrl: # user can control if streaming and response content type.
+  #    ctrl_mode: # `query_param`, `header_param` or `body_param`(only json body is supported). If not set, will use `query_param`.
+  #    ctrl_key: # key of control parameter. If not set, will use `streaming`. (`ctrl_key`=true) means streaming.
+  #    res_content_type: # response content type. If not set, will use `application/octet-stream`.
 
 max_connections: 1000 # Maximum number of concurrent connections.
 max_concurrency: 32 # Maximum parallel request limit; requests exceeding it will be queued.
@@ -768,9 +787,11 @@ log:
     * customized_predict_http：自定义http请求配置，如果需要启用，取消注释该配置，具体配置如下：
         * path：自定义http请求路径。
         * customized_body：是否使用自定义http请求body，如果为true，则需要用户自己解析请求和构造返回。
-*
-
-max_connections和max_concurrency配置用于配置服务的最大并发连接数和最大推理并发处理数。当并发请求超过最大并发请求数时，请求会被排队处理。超过最大并发连接数时，新的连接会被拒绝，这里需要注意非predict请求也会占用连接数，所以需要根据实际情况调整。
+        * streaming_ctrl：用户可以控制是否流式返回和响应内容类型。
+            * ctrl_mode：`query_param`、`header_param`或`body_param`（仅支持json body），如果未设置，将使用`query_param`。
+            * ctrl_key：控制参数的键。如果未设置，将使用`streaming`。(`ctrl_key`=true)表示流式返回。
+            * res_content_type：响应内容类型。如果未设置，将使用`application/octet-stream`。
+* max_connections和max_concurrency配置用于配置服务的最大并发连接数和最大推理并发处理数。当并发请求超过最大并发请求数时，请求会被排队处理。超过最大并发连接数时，新的连接会被拒绝，这里需要注意非predict请求也会占用连接数，所以需要根据实际情况调整。
 
 * gpu配置用于配置gpu监控以及是否开启gpu显存限制，目前支持gpu利用率和gpu内存监控，具体配置如下：
     * devices：需要监控的gpu设备号。

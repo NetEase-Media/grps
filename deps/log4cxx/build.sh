@@ -42,6 +42,7 @@ cmake \
   -DBUILD_TESTING=off \
   -DBUILD_SHARED_LIBS=off \
   -DLOG4CXX_CHARSET=utf-8 \
+  -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
   -DCMAKE_EXPORT_COMPILE_COMMANDS=TRUE && \
   cmake --build ${BUILD_DIR} -- -j && \
   cmake --build ${BUILD_DIR} --target install

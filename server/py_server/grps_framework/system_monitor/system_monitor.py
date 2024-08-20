@@ -127,7 +127,8 @@ class SystemMonitor(object):
 
         device_count = nvmlDeviceGetCount()
         if gpu_idx >= device_count:
-            raise ValueError('Invalid gpu index: {}, device count: {}.'.format(gpu_idx, device_count))
+            # raise ValueError('Invalid gpu index: {}, device count: {}.'.format(gpu_idx, device_count))
+            return 0
         handle = nvmlDeviceGetHandleByIndex(gpu_idx)
         usage = nvmlDeviceGetUtilizationRates(handle).gpu
         return usage
@@ -139,7 +140,8 @@ class SystemMonitor(object):
 
         device_count = nvmlDeviceGetCount()
         if gpu_idx >= device_count:
-            raise ValueError('Invalid gpu index: {}, device count: {}.'.format(gpu_idx, device_count))
+            # raise ValueError('Invalid gpu index: {}, device count: {}.'.format(gpu_idx, device_count))
+            return 0
         handle = nvmlDeviceGetHandleByIndex(gpu_idx)
         mem_info = nvmlDeviceGetMemoryInfo(handle)
         return mem_info.used / MIB

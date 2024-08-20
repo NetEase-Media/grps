@@ -211,18 +211,22 @@ unsigned int SystemMonitor::GetGpuUsage(int gpu_id) {
   result = nvmlDeviceGetCount_v2(&device_count);
   if (NVML_SUCCESS != result) {
     LOG4(ERROR, "Failed to get device count, error: " << nvmlErrorString(result));
+    return 0;
   }
   if (gpu_id >= device_count) {
-    LOG4(ERROR, "Invalid gpu id: " << gpu_id << ", device count: " << device_count);
+    // LOG4(ERROR, "Invalid gpu id: " << gpu_id << ", device count: " << device_count);
+    return 0;
   }
   result = nvmlDeviceGetHandleByIndex_v2(gpu_id, &device);
   if (NVML_SUCCESS != result) {
     LOG4(ERROR, "Failed to get device handle for device " << gpu_id << ", error: " << nvmlErrorString(result));
+    return 0;
   }
   nvmlUtilization_t utilization;
   result = nvmlDeviceGetUtilizationRates(device, &utilization);
   if (NVML_SUCCESS != result) {
     LOG4(ERROR, "Failed to get memory info for device " << gpu_id << ", error: " << nvmlErrorString(result));
+    return 0;
   }
   return utilization.gpu;
 }
@@ -238,18 +242,22 @@ unsigned long long SystemMonitor::GetGpuMemUsage(int gpu_id) {
   result = nvmlDeviceGetCount_v2(&device_count);
   if (NVML_SUCCESS != result) {
     LOG4(ERROR, "Failed to get device count, error: " << nvmlErrorString(result));
+    return 0;
   }
   if (gpu_id >= device_count) {
-    LOG4(ERROR, "Invalid gpu idx: " << gpu_id << ", device count: " << device_count);
+    // LOG4(ERROR, "Invalid gpu idx: " << gpu_id << ", device count: " << device_count);
+    return 0;
   }
   result = nvmlDeviceGetHandleByIndex_v2(gpu_id, &device);
   if (NVML_SUCCESS != result) {
     LOG4(ERROR, "Failed to get device handle for device " << gpu_id << ", error: " << nvmlErrorString(result));
+    return 0;
   }
   nvmlMemory_t memory;
   result = nvmlDeviceGetMemoryInfo(device, &memory);
   if (NVML_SUCCESS != result) {
     LOG4(ERROR, "Failed to get memory info for device " << gpu_id << ", error: " << nvmlErrorString(result));
+    return 0;
   }
   return memory.used / MIB;
 }

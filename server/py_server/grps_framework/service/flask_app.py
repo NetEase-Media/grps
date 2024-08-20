@@ -57,11 +57,12 @@ class GrpsFlaskApp(object):
         # Init infer router.
         customized_predict_http = global_conf.server_conf.get('interface').get('customized_predict_http')
         if customized_predict_http:
-            path = customized_predict_http.get('path')
-            if not path:
-                logger.error("server.yml: customized_predict_http.path is empty but customized_predict_http is true")
+            path = customized_predict_http.get('path', '')
+            if (not isinstance(path, str)) or len(path) == 0:
+                logger.error("server.yml: customized_predict_http.path is empty or not str but"
+                             " customized_predict_http is true")
                 raise ValueError(
-                    "server.yml: customized_predict_http.path is empty but customized_predict_http is true")
+                    "server.yml: customized_predict_http.path is empty or not str but customized_predict_http is true")
             if path in [URL_ROOT_PATH + '/health/online', URL_ROOT_PATH + '/health/offline',
                         URL_ROOT_PATH + '/health/live', URL_ROOT_PATH + '/health/ready',
                         URL_ROOT_PATH + '/infer/predict', URL_ROOT_PATH + '/metadata/server',
@@ -69,17 +70,27 @@ class GrpsFlaskApp(object):
                         URL_ROOT_PATH + '/monitor/metrics', URL_ROOT_PATH + '/']:
                 logger.error("server.yml: Invalid customized path: " + path + ", cannot use internal path.")
                 raise ValueError("server.yml: Invalid customized path: " + path + ", cannot use internal path.")
-            if customized_predict_http.get('customized_body'):
+
+            customized_body = customized_predict_http.get('customized_body', False)
+            if not isinstance(customized_body, bool):
+                logger.error("server.yml: customized_predict_http.customized_body is not bool")
+                raise ValueError("server.yml: customized_predict_http.customized_body is not bool")
+            if customized_body:
                 self.__app.add_url_rule(path, view_func=self.__http_handler.predict_custom_http,
                                         methods=['POST', 'GET'])
+                self.__app.add_url_rule(URL_ROOT_PATH + '/infer/predict',
+                                        view_func=self.__http_handler.predict_custom_http,
+                                        methods=['POST'])
             else:
                 self.__app.add_url_rule(path, view_func=self.__http_handler.predict,
                                         methods=['POST', 'GET'])
+                self.__app.add_url_rule(URL_ROOT_PATH + '/infer/predict', view_func=self.__http_handler.predict,
+                                        methods=['POST'])
 
             logger.info('register customized predict http path: ' + path)
-
-        self.__app.add_url_rule(URL_ROOT_PATH + '/infer/predict', view_func=self.__http_handler.predict,
-                                methods=['POST'])
+        else:
+            self.__app.add_url_rule(URL_ROOT_PATH + '/infer/predict', view_func=self.__http_handler.predict,
+                                    methods=['POST'])
 
         # Init metadata router.
         self.__app.add_url_rule(URL_ROOT_PATH + '/metadata/server', view_func=self.__http_handler.server_metadata,

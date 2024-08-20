@@ -13,6 +13,20 @@ PORT(HTTP,RPC)      NAME                PID                 DEPLOY_PATH
 7080,7081           my_grps             12345               /root/.grps/my_grps
 ```
 
+## 服务启动失败如何分析原因
+
+一般启动失败会有对应错误日志打印到终端，也可以进入到服务部署路径查看详细日志，如下：
+
+```
+# 进入部署路径
+cd /root/.grps/my_grps
+
+# 可以分析如下日志
+./nohup.out # 启动终端日志
+./logs/grps_server.log # 服务日志
+./logs/grps_usr.log # 用户自定义日志
+```
+
 ## C++自定义工程grps服务崩溃如何分析？
 
 ### 查看backtrace

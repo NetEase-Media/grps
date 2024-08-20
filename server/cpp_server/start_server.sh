@@ -14,6 +14,10 @@ timeout=$1 # timeout in seconds
 if [ -z "$timeout" ]; then
   timeout=60
 fi
+if [ $timeout -le 30 ]; then
+  echo -e "${COLORRED}[START ERROR]$COLOREND timeout should be greater than 30s."
+  exit 1
+fi
 
 rank_size=$2 # mpi rank size
 # Default rank_size is 1.
@@ -116,7 +120,7 @@ if [ -e "$libjemalloc_path" ]; then
   echo "Start server with libjemalloc."
 fi
 if [ $rank_size -gt 1 ]; then
-  mpirun --allow-run-as-root -np $rank_size -H localhost:$rank_size env LD_LIBRARY_PATH=./lib:$LD_LIBRARY_PATH nohup ./bin/grps_server &
+  env LD_LIBRARY_PATH=./lib:$LD_LIBRARY_PATH nohup mpirun --allow-run-as-root -np $rank_size -H localhost:$rank_size ./bin/grps_server &
 else
   env LD_LIBRARY_PATH=./lib:$LD_LIBRARY_PATH nohup ./bin/grps_server &
 fi
@@ -136,6 +140,9 @@ while true; do
   if [ -e "${log_dir}/grps_server.log" ]; then
     while read -r line; do
       log_time_str=$(echo "$line" | awk '{print $1"_"$2}')
+      if [[ ! "$log_time_str" =~ ^[0-9]{8}_[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{3} ]]; then
+        continue
+      fi
       if [ "$log_time_str" \> "$end_time_str" -a "$line" != "" ]; then
         echo "$line"
       fi
@@ -171,7 +178,7 @@ while true; do
       exit 1
     fi
   else
-    if [ "$retry" -ge 5 ]; then
+    if [ "$retry" -ge 30 ]; then
       echo -e "${COLORRED}[START ERROR]$COLOREND No server process. Maybe conf is invalid or env is not satisfied or you can try again."
       tail -30 nohup.out
       exit 1
@@ -191,7 +198,10 @@ while true; do
       done <<< "$(tail -n 30 ${log_dir}/grps_server.log)"
     fi
     echo -e "${COLORGREEN}[START SUCCESS]$COLOREND"
-    echo -e "${COLORGREEN}You can access http://${host}:${port}/ to observe server status.$COLOREND"
+    echo -e "${COLORGREEN}>> You can access http://${host}:${port}/ to observe server status.$COLOREND"
+    echo -e "${COLORGREEN}>> You can check service info by \`grpst ps\` cmd.$COLOREND"
+    echo -e "${COLORGREEN}>> Will show logs after 5s, you can stop showing by \`Ctrl+C\`.$COLOREND"
+    sleep 5
     exit 0
   fi
 

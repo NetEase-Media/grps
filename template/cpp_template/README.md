@@ -120,7 +120,7 @@ grpst archive ./
 
 ```bash
 # 部署
-# 如需修改端口、接口模式等服务参数，可以修改server.yml配置文件，跟上"--conf_path=./conf/server.yml"参数，可以跳过重新构建
+# 如需修改端口、接口模式等服务参数，可以修改server.yml配置文件，跟上"--server_conf=./conf/server.yml"参数，可以跳过重新构建
 # 部署成功后会自动跟踪日志，可以使用ctrl+c退出跟踪
 # 访问http://host:http_port/可以查看服务指标，观测服务状态
 grpst start ./server.mar

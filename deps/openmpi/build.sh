@@ -50,7 +50,7 @@ run_and_check tar -zxvf openmpi-5.0.4.tar.gz
 
 # build
 cd openmpi-5.0.4
-run_and_check ./configure
+run_and_check ./configure --prefix=/usr/local CXXFLAGS=-fPIC CFLAGS=-fPIC
 run_and_check make -j12
 run_and_check make install
 

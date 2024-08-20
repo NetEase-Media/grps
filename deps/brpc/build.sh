@@ -42,6 +42,7 @@ cmake \
   -DCMAKE_CXX_FLAGS="-I/usr/local/include -L/usr/local/lib -I/usr/include -L/usr/lib" \
   -DBUILD_SHARED_LIBS=TRUE \
   -DBUILD_BRPC_TOOLS=OFF \
+  -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
   -DCMAKE_EXPORT_COMPILE_COMMANDS=TRUE && \
   cmake --build ${BUILD_DIR} -- -j && \
   cmake --build ${BUILD_DIR} --target install

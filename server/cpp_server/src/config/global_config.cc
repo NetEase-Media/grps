@@ -56,6 +56,47 @@ bool GlobalConfig::LoadServerConf(const std::string& conf_path) {
     YAML_TRY_EXTRACT(customized_predict_http, customized_body, bool,
                      server_config_.interface.customized_predict_http.customized_body);
     server_config_._is_set.customized_predict_http = true;
+    auto streaming_ctrl = customized_predict_http["streaming_ctrl"];
+    if (streaming_ctrl && !streaming_ctrl.IsNull() && streaming_ctrl.IsMap()) {
+      if (streaming_ctrl["ctrl_mode"] && streaming_ctrl["ctrl_mode"].IsNull()) {
+        server_config_.interface.customized_predict_http.streaming_ctrl.ctrl_mode =
+          ServerConfig::StreamingCtrlMode::kQueryParam;
+      } else {
+        std::string ctrl_mode;
+        YAML_TRY_EXTRACT(streaming_ctrl, ctrl_mode, std::string, ctrl_mode);
+        if (ctrl_mode.empty() || ctrl_mode == "query_param") {
+          server_config_.interface.customized_predict_http.streaming_ctrl.ctrl_mode =
+            ServerConfig::StreamingCtrlMode::kQueryParam;
+        } else if (ctrl_mode == "header_param") {
+          server_config_.interface.customized_predict_http.streaming_ctrl.ctrl_mode =
+            ServerConfig::StreamingCtrlMode::kHeaderParam;
+        } else if (ctrl_mode == "body_param") {
+          server_config_.interface.customized_predict_http.streaming_ctrl.ctrl_mode =
+            ServerConfig::StreamingCtrlMode::kBodyParam;
+        } else {
+          std::cerr << "[server.yml] Server customized_predict_http streaming_ctrl ctrl_mode is invalid." << std::endl;
+          return false;
+        }
+      }
+      if (streaming_ctrl["ctrl_key"] && streaming_ctrl["ctrl_key"].IsNull()) {
+        server_config_.interface.customized_predict_http.streaming_ctrl.ctrl_key = "streaming";
+      } else {
+        YAML_TRY_EXTRACT(streaming_ctrl, ctrl_key, std::string,
+                         server_config_.interface.customized_predict_http.streaming_ctrl.ctrl_key);
+        if (server_config_.interface.customized_predict_http.streaming_ctrl.ctrl_key.empty()) {
+          server_config_.interface.customized_predict_http.streaming_ctrl.ctrl_key = "streaming";
+        }
+      }
+      if (streaming_ctrl["res_content_type"] && streaming_ctrl["res_content_type"].IsNull()) {
+        server_config_.interface.customized_predict_http.streaming_ctrl.res_content_type = "application/octet-stream";
+      } else {
+        YAML_TRY_EXTRACT(streaming_ctrl, res_content_type, std::string,
+                         server_config_.interface.customized_predict_http.streaming_ctrl.res_content_type);
+        if (server_config_.interface.customized_predict_http.streaming_ctrl.res_content_type.empty()) {
+          server_config_.interface.customized_predict_http.streaming_ctrl.res_content_type = "application/octet-stream";
+        }
+      }
+    }
   }
 
   YAML_TRY_EXTRACT(server_conf, max_connections, int, server_config_.max_connections);
@@ -124,8 +165,10 @@ bool GlobalConfig::LoadInferenceConf(const std::string& conf_path) {
     YAML_TRY_EXTRACT(model_conf, name, std::string, model_config.name);
     YAML_TRY_EXTRACT(model_conf, version, std::string, model_config.version);
     YAML_TRY_EXTRACT(model_conf, device, std::string, model_config.device);
-    YAML_TRY_EXTRACT(model_conf, inp_device, std::string, model_config.inp_device);
     YAML_TRY_EXTRACT(model_conf, inferer_type, std::string, model_config.inferer_type);
+    if (model_config.device == "original" && model_config.inferer_type == "torch") {
+      YAML_TRY_EXTRACT(model_conf, inp_device, std::string, model_config.inp_device);
+    }
     YAML_TRY_EXTRACT(model_conf, inferer_name, std::string, model_config.inferer_name);
     YAML_TRY_EXTRACT(model_conf, inferer_path, std::string, model_config.inferer_path);
     YAML_TRY_EXTRACT(model_conf, inferer_args, YAML::Node, model_config.inferer_args);

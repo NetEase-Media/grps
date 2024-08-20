@@ -135,7 +135,7 @@ class GrpsProjectArchiver(object):
 
     def __check_inference_conf(self, conf_path):
         """
-        Check build conf.
+        Check inference conf.
 
         Args:
             conf_path: Build conf path.
@@ -397,7 +397,7 @@ class GrpsProjectArchiver(object):
         if not os.path.exists(customized_src_path):
             print('customized src {} not exist.'.format(customized_src_path))
             return False
-        subprocess.call('cp -Lr {}/* {}/'.format(customized_src_path, customized_dst_path), shell=True)
+        subprocess.call('cp -r {}/* {}/'.format(customized_src_path, customized_dst_path), shell=True)
 
         # 3. Merge data.
         data_src_path = os.path.join(project_path, 'data')
@@ -405,18 +405,16 @@ class GrpsProjectArchiver(object):
         if not os.path.exists(data_src_path):
             print('data src {} not exist.'.format(data_src_path))
             return False
-        subprocess.call('cp -Lr {}/* {}/'.format(data_src_path, data_dst_path), shell=True)
+        subprocess.call('cp -r {}/* {}/'.format(data_src_path, data_dst_path), shell=True)
 
         # 4. Merge so.
-        so_src_path = os.path.join(project_path, 'build/RelWithDebInfo_install/lib/libgrps-server-customized.so')
+        so_src_path = os.path.join(project_path, 'build/RelWithDebInfo_install/lib')
         so_dst_path = os.path.join(server_work_dir,
-                                   'third_party/grps-server-customized/lib/libgrps-server-customized.so')
+                                   'third_party/grps-server-customized/lib')
         if not os.path.exists(so_src_path):
             print('{} not exist.'.format(so_src_path))
             return False
-        if os.path.exists(so_dst_path):
-            os.remove(so_dst_path)
-        shutil.copyfile(so_src_path, so_dst_path)
+        subprocess.call('cp -r {}/* {}/'.format(so_src_path, so_dst_path), shell=True)
 
         # 5. Merge .config
         config_src_path = os.path.join(project_path, '.config')
@@ -465,7 +463,7 @@ class GrpsProjectArchiver(object):
         if not os.path.exists(data_src_path):
             print('data src {} not exist.'.format(data_src_path))
             return False
-        subprocess.call('cp -Lr {}/* {}/'.format(data_src_path, data_dst_path), shell=True)
+        subprocess.call('cp -r {}/* {}/'.format(data_src_path, data_dst_path), shell=True)
 
         # 3. Merge src.
         src_path_src = os.path.join(project_path, 'src')
@@ -473,7 +471,7 @@ class GrpsProjectArchiver(object):
         if not os.path.exists(src_path_src):
             print('src {} not exist.'.format(src_path_src))
             return False
-        subprocess.call('cp -Lr {}/* {}/'.format(src_path_src, src_path_dst), shell=True)
+        subprocess.call('cp -r {}/* {}/'.format(src_path_src, src_path_dst), shell=True)
 
         # 4. append requirements.txt
         requirements_path_src = os.path.join(project_path, 'requirements.txt')

@@ -134,14 +134,10 @@ public:
   std::shared_ptr<Eigen::Tensor<int64_t, 2>> eigen_2d_l_tensor;
   std::shared_ptr<Eigen::Tensor<int64_t, 3>> eigen_3d_l_tensor;
   std::shared_ptr<Eigen::Tensor<int64_t, 4>> eigen_4d_l_tensor;
-
-  std::vector<uint8_t> raw_tensor;
-  std::string str_tensor;
-  int32_t int_tensor = 0;
-  int64_t long_tensor = 0;
-  float float_tensor = 0.0;
-  double double_tensor = 0.0;
-  void* tensor_ptr = nullptr; // raw ptr, user should manage the life cycle of tensor_ptr, not recommended.
+  std::shared_ptr<Eigen::Tensor<std::string, 1>> eigen_1d_s_tensor;
+  std::shared_ptr<Eigen::Tensor<std::string, 2>> eigen_2d_s_tensor;
+  std::shared_ptr<Eigen::Tensor<std::string, 3>> eigen_3d_s_tensor;
+  std::shared_ptr<Eigen::Tensor<std::string, 4>> eigen_4d_s_tensor;
 
   TensorWrapper() = default;
   ~TensorWrapper() = default;
@@ -318,28 +314,37 @@ public:
       : eigen_4d_l_tensor(std::make_shared<Eigen::Tensor<int64_t, 4>>(eigen_4d_l_tensor)) {}
   explicit TensorWrapper(Eigen::Tensor<int64_t, 4>&& eigen_4d_l_tensor)
       : eigen_4d_l_tensor(std::make_shared<Eigen::Tensor<int64_t, 4>>(std::move(eigen_4d_l_tensor))) {}
-
-  // Set raw tensor.
-  explicit TensorWrapper(const std::vector<uint8_t>& raw_tensor) : raw_tensor(raw_tensor) {}
-  explicit TensorWrapper(std::vector<uint8_t>&& raw_tensor) : raw_tensor(std::move(raw_tensor)) {}
-
-  // Set string tensor.
-  explicit TensorWrapper(const std::string& str_tensor) : str_tensor(str_tensor) {}
-  explicit TensorWrapper(std::string&& str_tensor) : str_tensor(std::move(str_tensor)) {}
-
-  // Set int tensor.
-  explicit TensorWrapper(int32_t int_tensor) : int_tensor(int_tensor) {}
-
-  // Set long tensor.
-  explicit TensorWrapper(int64_t long_tensor) : long_tensor(long_tensor) {}
-
-  // Set float tensor.
-  explicit TensorWrapper(float float_tensor) : float_tensor(float_tensor) {}
-
-  // Set double tensor.
-  explicit TensorWrapper(double double_tensor) : double_tensor(double_tensor) {}
-
-  // Set raw ptr tensor.
-  explicit TensorWrapper(void* tensor_ptr) : tensor_ptr(tensor_ptr) {}
+  explicit TensorWrapper(const std::shared_ptr<Eigen::Tensor<std::string, 1>>& eigen_1d_s_tensor)
+      : eigen_1d_s_tensor(eigen_1d_s_tensor) {}
+  explicit TensorWrapper(std::shared_ptr<Eigen::Tensor<std::string, 1>>&& eigen_1d_s_tensor)
+      : eigen_1d_s_tensor(std::move(eigen_1d_s_tensor)) {}
+  explicit TensorWrapper(const Eigen::Tensor<std::string, 1>& eigen_1d_s_tensor)
+      : eigen_1d_s_tensor(std::make_shared<Eigen::Tensor<std::string, 1>>(eigen_1d_s_tensor)) {}
+  explicit TensorWrapper(Eigen::Tensor<std::string, 1>&& eigen_1d_s_tensor)
+      : eigen_1d_s_tensor(std::make_shared<Eigen::Tensor<std::string, 1>>(std::move(eigen_1d_s_tensor))) {}
+  explicit TensorWrapper(const std::shared_ptr<Eigen::Tensor<std::string, 2>>& eigen_2d_s_tensor)
+      : eigen_2d_s_tensor(eigen_2d_s_tensor) {}
+  explicit TensorWrapper(std::shared_ptr<Eigen::Tensor<std::string, 2>>&& eigen_2d_s_tensor)
+      : eigen_2d_s_tensor(std::move(eigen_2d_s_tensor)) {}
+  explicit TensorWrapper(const Eigen::Tensor<std::string, 2>& eigen_2d_s_tensor)
+      : eigen_2d_s_tensor(std::make_shared<Eigen::Tensor<std::string, 2>>(eigen_2d_s_tensor)) {}
+  explicit TensorWrapper(Eigen::Tensor<std::string, 2>&& eigen_2d_s_tensor)
+      : eigen_2d_s_tensor(std::make_shared<Eigen::Tensor<std::string, 2>>(std::move(eigen_2d_s_tensor))) {}
+  explicit TensorWrapper(const std::shared_ptr<Eigen::Tensor<std::string, 3>>& eigen_3d_s_tensor)
+      : eigen_3d_s_tensor(eigen_3d_s_tensor) {}
+  explicit TensorWrapper(std::shared_ptr<Eigen::Tensor<std::string, 3>>&& eigen_3d_s_tensor)
+      : eigen_3d_s_tensor(std::move(eigen_3d_s_tensor)) {}
+  explicit TensorWrapper(const Eigen::Tensor<std::string, 3>& eigen_3d_s_tensor)
+      : eigen_3d_s_tensor(std::make_shared<Eigen::Tensor<std::string, 3>>(eigen_3d_s_tensor)) {}
+  explicit TensorWrapper(Eigen::Tensor<std::string, 3>&& eigen_3d_s_tensor)
+      : eigen_3d_s_tensor(std::make_shared<Eigen::Tensor<std::string, 3>>(std::move(eigen_3d_s_tensor))) {}
+  explicit TensorWrapper(const std::shared_ptr<Eigen::Tensor<std::string, 4>>& eigen_4d_s_tensor)
+      : eigen_4d_s_tensor(eigen_4d_s_tensor) {}
+  explicit TensorWrapper(std::shared_ptr<Eigen::Tensor<std::string, 4>>&& eigen_4d_s_tensor)
+      : eigen_4d_s_tensor(std::move(eigen_4d_s_tensor)) {}
+  explicit TensorWrapper(const Eigen::Tensor<std::string, 4>& eigen_4d_s_tensor)
+      : eigen_4d_s_tensor(std::make_shared<Eigen::Tensor<std::string, 4>>(eigen_4d_s_tensor)) {}
+  explicit TensorWrapper(Eigen::Tensor<std::string, 4>&& eigen_4d_s_tensor)
+      : eigen_4d_s_tensor(std::make_shared<Eigen::Tensor<std::string, 4>>(std::move(eigen_4d_s_tensor))) {}
 };
 } // namespace netease::grps

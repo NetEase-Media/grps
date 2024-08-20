@@ -8,6 +8,7 @@ import json
 import time
 import traceback
 from concurrent.futures import ThreadPoolExecutor
+from enum import Enum
 
 import grpc
 import numpy as np
@@ -269,10 +270,49 @@ class GrpcHandler(grps_pb2_grpc.GrpsServiceServicer):
 
 
 class HttpHandler(object):
+    class HttpStreamingCtrlMode(Enum):
+        QUERY_PARAM = 0
+        HEADER_PARAM = 1
+        BODY_PARAM = 2
+
     def __init__(self, executor, tp: ThreadPoolExecutor = None):
         self.__executor = executor
         self.__health = False
         self.__tp = tp
+
+        self.__http_streaming_ctrl_mode = HttpHandler.HttpStreamingCtrlMode.QUERY_PARAM
+        self.__http_streaming_ctrl_key = 'streaming'
+        self.__http_streaming_res_content_type = 'application/octet-stream'
+        customized_predict_http = global_conf.server_conf.get('interface').get('customized_predict_http')
+        if customized_predict_http:
+            streaming_ctrl = customized_predict_http.get('streaming_ctrl')
+            if streaming_ctrl:
+                ctrl_mode = streaming_ctrl.get('ctrl_mode')
+                if ctrl_mode:
+                    if type(ctrl_mode) is not str:
+                        raise ValueError('server.yml: streaming control mode must be str.')
+                    if ctrl_mode == "" or ctrl_mode == 'query_param':
+                        self.__http_streaming_ctrl_mode = HttpHandler.HttpStreamingCtrlMode.QUERY_PARAM
+                    elif ctrl_mode == 'header_param':
+                        self.__http_streaming_ctrl_mode = HttpHandler.HttpStreamingCtrlMode.HEADER_PARAM
+                    elif ctrl_mode == 'body_param':
+                        self.__http_streaming_ctrl_mode = HttpHandler.HttpStreamingCtrlMode.BODY_PARAM
+                    else:
+                        raise ValueError('server.yml: streaming control mode {} not supported.'.format(ctrl_mode))
+
+                ctrl_key = streaming_ctrl.get('ctrl_key')
+                if ctrl_key:
+                    if type(ctrl_key) is not str:
+                        raise ValueError('server.yml: streaming control key must be str.')
+                    if ctrl_key != "":
+                        self.__http_streaming_ctrl_key = ctrl_key
+
+                res_content_type = streaming_ctrl.get('res_content_type')
+                if res_content_type:
+                    if type(res_content_type) is not str:
+                        raise ValueError('server.yml: streaming response content type must be str.')
+                    if res_content_type != "":
+                        self.__http_streaming_res_content_type = res_content_type
 
     @staticmethod
     def __jsonify(res, code):
@@ -335,6 +375,39 @@ class HttpHandler(object):
                                         status=Status.FAILURE))
         return self.__jsonify(res, http.HTTPStatus.NOT_FOUND.value)
 
+    def if_streaming(self, request):
+        """
+        Check if request is streaming.
+        Args:
+            request: flask request.
+
+        Returns:
+            bool.
+        """
+        if self.__http_streaming_ctrl_mode == HttpHandler.HttpStreamingCtrlMode.QUERY_PARAM:
+            streaming_query_arg = request.args.get(self.__http_streaming_ctrl_key)
+            if streaming_query_arg is not None and streaming_query_arg.lower() == 'true':
+                return True
+            return False
+        elif self.__http_streaming_ctrl_mode == HttpHandler.HttpStreamingCtrlMode.HEADER_PARAM:
+            streaming_header_arg = request.headers.get(self.__http_streaming_ctrl_key)
+            if streaming_header_arg is not None and streaming_header_arg.lower() == 'true':
+                return True
+            return False
+        elif self.__http_streaming_ctrl_mode == HttpHandler.HttpStreamingCtrlMode.BODY_PARAM:
+            body = request.get_data()
+            if body is None:
+                return False
+            try:
+                js_dict = json.loads(body)
+                if (js_dict.get(self.__http_streaming_ctrl_key) is not None and
+                        type(js_dict[self.__http_streaming_ctrl_key]) is bool and
+                        js_dict[self.__http_streaming_ctrl_key]):
+                    return True
+                return False
+            except Exception as e:
+                return False
+
     def predict(self):
         """
         Infer predict http url handler.
@@ -358,10 +431,7 @@ class HttpHandler(object):
                 return self.__jsonify(res, http.HTTPStatus.BAD_REQUEST.value)
 
             # get streaming arg.
-            is_streaming = False
-            streaming_query_arg = request.args.get('streaming')
-            if streaming_query_arg is not None and streaming_query_arg.lower() == 'true':
-                is_streaming = True
+            is_streaming = self.if_streaming(request)
 
             # get return-ndarray arg.
             ret_ndarray = False
@@ -384,7 +454,8 @@ class HttpHandler(object):
             task = self.__tp.submit(self.__predict_task, content_type, body, request._get_current_object(),
                                     is_streaming, ret_ndarray, grps_context)
             if is_streaming:
-                return Response(stream_with_context(grps_context.http_streaming_generator()), mimetype='application/octet-stream')
+                return Response(stream_with_context(grps_context.http_streaming_generator()),
+                                mimetype=self.__http_streaming_res_content_type)
             else:
                 res = task.result()
                 return res
@@ -552,10 +623,7 @@ class HttpHandler(object):
         """
         try:
             # get streaming arg.
-            is_streaming = False
-            streaming_query_arg = request.args.get('streaming')
-            if streaming_query_arg is not None and streaming_query_arg.lower() == 'true':
-                is_streaming = True
+            is_streaming = self.if_streaming(request)
 
             grps_context = GrpsContext(http_request=request._get_current_object())
             if is_streaming:
@@ -565,7 +633,7 @@ class HttpHandler(object):
                                     is_streaming, grps_context)
             if is_streaming:
                 return Response(stream_with_context(grps_context.http_streaming_generator()),
-                                mimetype='application/octet-stream')
+                                mimetype=self.__http_streaming_res_content_type)
             else:
                 res = task.result()
                 return res

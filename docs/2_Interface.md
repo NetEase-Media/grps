@@ -380,9 +380,11 @@ rpc ModelMetadata(GrpsMessage) returns (GrpsMessage) {};
 
 ### HTTP Streaming
 
-当使用推理接口时，可以加上“streaming=true” query-param，即可使用streaming模式请求，grps服务端使用http chunked
-transfer-encoding
-方式进行streaming响应，content type为“application/octet-stream”。
+当使用推理接口时，根据[streaming模式的控制方式](./5_Customized.md#配置streaming模式控制方式)
+进行参数设置，继而使用streaming模式请求，默认情况下使用```streaming=true```
+query-param控制。grps服务端使用```http chunked transfer-encoding```
+方式进行streaming响应，response content type见[streaming模式相关配置](./5_Customized.md#配置streaming模式控制方式)
+，默认为```application/octet-stream```。
 
 ### GRPC Streaming
 
@@ -401,10 +403,7 @@ rpc PredictStreaming(GrpsMessage) returns (stream GrpsMessage) {};
 推理接口支持用户完全自定义http请求和返回格式，用户需要打开自定义http配置（```server.yml - interface -
 customized_predict_http```
 ）并自行解析http请求和构建http返回，具体见[实现自定义http请求获取和返回](5_Customized.md#4-实现自定义http请求获取和返回)。
-自定义HTTP同样支持streaming模式，请求时需要加上“streaming=true”
-query-param，用户可以调用自定义```http streaming respond api```
-进行回复，服务会以chunked
-transfer-encoding方式进行响应，content type为“application/octet-stream”。
+自定义HTTP同样支持streaming模式。
 
 ## 模型选择
 

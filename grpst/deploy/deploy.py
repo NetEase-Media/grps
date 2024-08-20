@@ -30,7 +30,10 @@ class GrpsProjectDeployer(object):
         """
         parser_deploy = subparsers.add_parser('start', help='start project')
         parser_deploy.add_argument('--name', type=str, help='server name, default is \"my_grps\"', default='my_grps')
-        parser_deploy.add_argument('--conf_path', type=str,
+        parser_deploy.add_argument('--inference_conf', type=str,
+                                   help='inference conf path, will use inference.yml in mar(mar_path arg) if not set',
+                                   required=False)
+        parser_deploy.add_argument('--server_conf', type=str,
                                    help='server conf path, will use server.yml in mar(mar_path arg) if not set',
                                    required=False)
         parser_deploy.add_argument('--timeout', type=int, help='server start timeout, default is 300s', default=300)
@@ -39,9 +42,151 @@ class GrpsProjectDeployer(object):
         parser_deploy.add_argument('mar_path', type=str, help='model server archive path')
         parser_deploy.set_defaults(func=self.deploy)  # Set default function.
 
+    def __check_inference_conf(self, inference_conf):
+        """ Check inference conf. """
+        # 1. Check models conf.
+        models = []
+        models_conf = inference_conf.get('models')
+        if not models_conf:
+            print('[inference.yml] models not set in inference conf.')
+            return False
+        if len(models_conf) == 0:
+            print('[inference.yml] models is empty in inference conf.')
+            return False
+        for model_conf in models_conf:
+            # model name
+            model_name = model_conf.get('name')
+            if not model_name:
+                print('[inference.yml] model name not set in model conf.')
+                return False
+
+            # model version
+            model_version = model_conf.get('version')
+            if not model_version:
+                print('[inference.yml] model version not set in model conf.')
+                return False
+
+            # model inferer type
+            inferer_type = model_conf.get('inferer_type')
+            if not inferer_type:
+                print('[inference.yml] model type not set in model conf.')
+                return False
+            if inferer_type not in ['torch', 'tensorflow', 'tensorrt', 'customized']:
+                print('[inference.yml] inferer_type {} not supported, should be torch, tensorflow, tensorrt or'
+                      ' customized.'.format(inferer_type))
+                return False
+            if inferer_type == 'customized':
+                inferer_name = model_conf.get('inferer_name')
+                if not inferer_name:
+                    print('[inference.yml] inferer_name not set in model conf.')
+                    return False
+
+            # model converter
+            converter_type = model_conf.get('converter_type')
+            if not converter_type:
+                print('[inference.yml] converter_type not set in model conf.')
+                return False
+            if converter_type not in ['torch', 'tensorflow', 'tensorrt', 'customized', 'none']:
+                print('[inference.yml] converter_type {} not supported, should be torch, tensorflow, tensorrt, '
+                      'customized or none.'.format(converter_type))
+                return False
+            if converter_type == 'customized':
+                converter_name = model_conf.get('converter_name')
+                if not converter_name:
+                    print('[inference.yml] converter_name not set in model conf.')
+                    return False
+
+            # model inferer path
+            inferer_path = model_conf.get('inferer_path')
+            if inferer_type in ['torch', 'tensorflow', 'tensorrt']:
+                if not inferer_path:
+                    print('[inference.yml] inferer_path not set in model conf.')
+                    return False
+
+            # model device
+            model_device = model_conf.get('device')
+            if not model_device:
+                print('[inference.yml] model device not set in model conf.')
+                return False
+
+            # batching config
+            batching = model_conf.get('batching')
+            if batching:
+                batch_type = batching.get('type')
+                if not batch_type:
+                    print('[inference.yml] model batching type not set in model conf.')
+                    return False
+                if batch_type not in ['none', 'dynamic']:
+                    print('[inference.yml] model batching type {} not supported, should be none or dynamic.'.format(
+                        batch_type))
+                    return False
+                max_batch_size = batching.get('max_batch_size')
+                if not max_batch_size:
+                    print('[inference.yml] model batching max_batch_size not set in model conf.')
+                    return False
+                if type(max_batch_size) != int:
+                    print('[inference.yml] model batching max_batch_size should be int.')
+                    return False
+                if max_batch_size <= 0:
+                    print('[inference.yml] model batching max_batch_size should be greater than 0.')
+                    return False
+                batch_timeout_us = batching.get('batch_timeout_us')
+                if not batch_timeout_us:
+                    print('[inference.yml] model batching batch_timeout_us not set in model conf.')
+                    return False
+                if type(batch_timeout_us) != int:
+                    print('[inference.yml] model batching batch_timeout_us should be int.')
+                    return False
+                if batch_timeout_us <= 0:
+                    print('[inference.yml] model batching batch_timeout_us should be greater than 0.')
+                    return False
+
+            models.append(model_name + '-' + model_version)
+
+        # 2. Check dag conf.
+        dag_conf = inference_conf.get('dag')
+        if not dag_conf:
+            print('[inference.yml] dag not set in inference conf.')
+            return False
+        dag_type = dag_conf.get('type')
+        if not dag_type:
+            print('[inference.yml] dag type not set in dag conf.')
+            return False
+        # TODO: Add more dag type.
+        if dag_type not in ['sequential']:
+            print('[inference.yml] dag type {} not supported, only support sequential now.'.format(dag_type))
+            return False
+        nodes = dag_conf.get('nodes')
+        if len(nodes) == 0:
+            print('[inference.yml] nodes is empty in dag conf.')
+            return False
+        for node in nodes:
+            node_name = node.get('name')
+            if not node_name:
+                print('[inference.yml] node name not set in node conf.')
+                return False
+            node_type = node.get('type')
+            if not node_type:
+                print('[inference.yml] node type not set in node conf.')
+                return False
+            # TODO: Add more node type.
+            if node_type not in ['model']:
+                print('[inference.yml] node type {} not supported, only support model now.'.format(node_type))
+                return False
+            if node_type == 'model':
+                model = node.get('model')
+                if not model:
+                    print('[inference.yml] model not set in node conf.')
+                    return False
+                if model not in models:
+                    print('[inference.yml] node model {} not in models({}).'.format(model, models))
+                    return False
+
+        return True
+
     @staticmethod
-    def __check_conf(server_conf):
-        """Check run conf."""
+    def __check_server_conf(server_conf):
+        """Check server conf."""
 
         def if_occupied(ip, port):
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -87,14 +232,14 @@ class GrpsProjectDeployer(object):
             # Check port if occupied
             if if_occupied(interface_host_conf, port):
                 print('Port({}) is occupied. You can change port in conf/server.yml and use it without re-archive by'
-                      ' --conf_path.'.format(port))
+                      ' --server_conf.'.format(port))
                 return False
         # Check customized_predict_http.
         customized_predict_http_conf = interface_conf.get('customized_predict_http')
         if customized_predict_http_conf:
-            customized_predict_http_path = customized_predict_http_conf.get('path')
-            if not customized_predict_http_path:
-                print('[server.yml] Customized predict http path conf not exists.')
+            customized_predict_http_path = customized_predict_http_conf.get('path', '')
+            if (not isinstance(customized_predict_http_path, str)) or len(customized_predict_http_path) == 0:
+                print('[server.yml] Customized predict http path conf not str or empty.')
                 return False
             if not re.match(r'^/[a-zA-Z0-9_\-/]+$', customized_predict_http_path):
                 print('[server.yml] Invalid customized predict http path: {}'.format(customized_predict_http_path))
@@ -109,7 +254,7 @@ class GrpsProjectDeployer(object):
                     customized_predict_http_path))
                 return False
             customized_body = customized_predict_http_conf.get('customized_body')
-            if type(customized_body) != bool:
+            if type(customized_body) is not bool:
                 print('[server.yml] Customized predict http customized_body conf should be bool.')
                 return False
 
@@ -194,12 +339,13 @@ class GrpsProjectDeployer(object):
 
         return True
 
-    def __prepare_project(self, mar_path, conf_path):
+    def __prepare_project(self, mar_path, inference_conf, server_conf):
         """
         Prepare project.
         Args:
             mar_path: mar file path.
-            conf_path: run conf path.
+            inference_conf: inference conf path.
+            server_conf: server conf path.
 
         Returns:
             True for success, False for failure.
@@ -211,16 +357,28 @@ class GrpsProjectDeployer(object):
         tar.extractall(path=self.__grps_server_work_dir)
         tar.close()
 
-        # Merge run conf.
-        run_conf_path_dst = os.path.join(self.__grps_server_work_dir, 'conf/server.yml')
-        if conf_path:
-            if not os.path.exists(conf_path):
+        # Merge inference conf.
+        inference_conf_path_dst = os.path.join(self.__grps_server_work_dir, 'conf/inference.yml')
+        if inference_conf:
+            if not os.path.exists(inference_conf):
+                print('inference conf file not exists.')
+                return False
+            shutil.copyfile(inference_conf, inference_conf_path_dst)
+        with open(inference_conf_path_dst, 'r', encoding='utf-8') as reader:
+            inference_conf = yaml.load(reader, Loader=yaml.FullLoader)
+        if not self.__check_inference_conf(inference_conf):
+            return False
+
+        # Merge server conf.
+        server_conf_path_dst = os.path.join(self.__grps_server_work_dir, 'conf/server.yml')
+        if server_conf:
+            if not os.path.exists(server_conf):
                 print('run conf file not exists.')
                 return False
-            shutil.copyfile(conf_path, run_conf_path_dst)
-        with open(run_conf_path_dst, 'r', encoding='utf-8') as reader:
+            shutil.copyfile(server_conf, server_conf_path_dst)
+        with open(server_conf_path_dst, 'r', encoding='utf-8') as reader:
             server_conf = yaml.load(reader, Loader=yaml.FullLoader)
-        if not self.__check_conf(server_conf):
+        if not self.__check_server_conf(server_conf):
             return False
         return True
 
@@ -269,10 +427,13 @@ class GrpsProjectDeployer(object):
 
         print('>>>> Starting server({})...'.format(args.name))
 
-        print('>>>> Preparing grps project, mar_path: {}, conf_path: {}'
+        print('>>>> Preparing grps project, mar_path: {}, inference_conf: {}, server_conf: {}'
               .format(args.mar_path,
-                      args.conf_path if args.conf_path else '(will use server.yml conf in {})'.format(args.mar_path)))
-        if not self.__prepare_project(args.mar_path, args.conf_path):
+                      args.inference_conf if args.inference_conf else '(will use inference.yml conf in {})'.format(
+                          args.mar_path),
+                      args.server_conf if args.server_conf else '(will use server.yml conf in {})'.format(
+                          args.mar_path)))
+        if not self.__prepare_project(args.mar_path, args.inference_conf, args.server_conf):
             print('Prepare grps project failed')
             utils.file_unlock(lock_file_fd, lock_file)
             return -1
@@ -283,7 +444,7 @@ class GrpsProjectDeployer(object):
             print('Start grps server({}) failed'.format(args.name))
             utils.file_unlock(lock_file_fd, lock_file)
             return -1
-        print('>>>> Start grps server({}) finished'.format(args.name))
+        # print('>>>> Start grps server({}) finished'.format(args.name))
 
         # Unlock work dir.
         utils.file_unlock(lock_file_fd, lock_file)
@@ -302,12 +463,15 @@ class GrpsProjectDeployer(object):
             return ret
 
         # Wait child process to finish.
-        ret = os.read(read_fd, 1)
-        if ret == b'0':
-            return -1
+        try:
+            ret = os.read(read_fd, 1)
+            if ret == b'0':
+                return -1
+        except KeyboardInterrupt as e:
+            return 0
 
         # Show server logs.
-        print('\n\n>>>> Showing server logs, stop showing by Ctrl+C.')
+        # print('\n\n>>>> Showing server logs, stop showing by Ctrl+C.')
         signal.signal(signal.SIGINT, signal.SIG_DFL)
         os.system('grpst logs {}'.format(args.name))
         return 0

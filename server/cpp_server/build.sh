@@ -131,13 +131,3 @@ if [ $? -ne 0 ]; then
   LOG WARNING "build with cmake failed."
   exit 1
 fi
-
-if [ ${tf_enable} -eq 1 ]; then
-  ln -s ${libtensorflow_path}/lib/* ${INSTALL_DIR}/lib/
-fi
-if [ ${torch_enable} -eq 1 ]; then
-  ln -s ${libtorch_path}/lib/* ${INSTALL_DIR}/lib/
-fi
-if [ ${trt_enable} -eq 1 ]; then
-  ln -s ${libtensorrt_path}/lib/* ${INSTALL_DIR}/lib/
-fi

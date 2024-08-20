@@ -46,7 +46,7 @@ run_and_check tar -zxvf eigen-3.4.0.tar.gz
 cd eigen-3.4.0
 mkdir build
 cd build
-run_and_check cmake ..
+run_and_check cmake .. -DCMAKE_CXX_FLAGS="-fPIC" -DCMAKE_C_FLAGS="-fPIC"
 run_and_check make install
 
 # clean

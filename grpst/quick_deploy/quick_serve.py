@@ -701,7 +701,7 @@ class GrpsQuickServe(object):
             print('Start grps server({}) failed'.format(args.name))
             utils.file_unlock(lock_file_fd, lock_file)
             return -1
-        print('>>>> Start grps server({}) finished'.format(args.name))
+        # print('>>>> Start grps server({}) finished'.format(args.name))
 
         # Unlock work dir.
         utils.file_unlock(lock_file_fd, lock_file)
@@ -719,12 +719,15 @@ class GrpsQuickServe(object):
             return ret
 
         # Wait child process to finish.
-        ret = os.read(read_fd, 1)
-        if ret == b'0':
-            return -1
+        try:
+            ret = os.read(read_fd, 1)
+            if ret == b'0':
+                return -1
+        except KeyboardInterrupt as e:
+            return 0
 
         # Show server logs.
-        print('\n\n>>>> Showing server logs, stop showing by Ctrl+C.')
+        # print('\n\n>>>> Showing server logs, stop showing by Ctrl+C.')
         signal.signal(signal.SIGINT, signal.SIG_DFL)
         os.system('grpst logs {}'.format(args.name))
         return 0
@@ -741,12 +744,15 @@ class GrpsQuickServe(object):
             return ret
 
         # Wait child process to finish.
-        ret = os.read(read_fd, 1)
-        if ret == b'0':
-            return -1
+        try:
+            ret = os.read(read_fd, 1)
+            if ret == b'0':
+                return -1
+        except KeyboardInterrupt as e:
+            return 0
 
         # Show server logs.
-        print('\n\n>>>> Showing server logs, stop showing by Ctrl+C.')
+        # print('\n\n>>>> Showing server logs, stop showing by Ctrl+C.')
         signal.signal(signal.SIGINT, signal.SIG_DFL)
         os.system('grpst logs {}'.format(args.name))
         return 0
@@ -763,12 +769,15 @@ class GrpsQuickServe(object):
             return ret
 
         # Wait child process to finish.
-        ret = os.read(read_fd, 1)
-        if ret == b'0':
-            return -1
+        try:
+            ret = os.read(read_fd, 1)
+            if ret == b'0':
+                return -1
+        except KeyboardInterrupt as e:
+            return 0
 
         # Show server logs.
-        print('\n\n>>>> Showing server logs, stop showing by Ctrl+C.')
+        # print('\n\n>>>> Showing server logs, stop showing by Ctrl+C.')
         signal.signal(signal.SIGINT, signal.SIG_DFL)
         os.system('grpst logs {}'.format(args.name))
         return 0
