@@ -581,7 +581,7 @@ context.set_err_msg("your error message");
 
 #### 3. streaming流式返回
 
-##### 配置streaming模式控制方式
+##### 配置streaming模式控制
 
 ```yaml
 streaming_ctrl: # user can control if streaming and response content type.

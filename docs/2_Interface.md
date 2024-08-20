@@ -380,10 +380,10 @@ rpc ModelMetadata(GrpsMessage) returns (GrpsMessage) {};
 
 ### HTTP Streaming
 
-当使用推理接口时，根据[streaming模式的控制方式](./5_Customized.md#配置streaming模式控制方式)
+当使用推理接口时，根据[streaming模式的控制方式](./5_Customized.md#配置streaming模式控制)
 进行参数设置，继而使用streaming模式请求，默认情况下使用```streaming=true```
 query-param控制。grps服务端使用```http chunked transfer-encoding```
-方式进行streaming响应，response content type见[streaming模式相关配置](./5_Customized.md#配置streaming模式控制方式)
+方式进行streaming响应，response content type见[streaming模式相关配置](./5_Customized.md#配置streaming模式控制)
 ，默认为```application/octet-stream```。
 
 ### GRPC Streaming
