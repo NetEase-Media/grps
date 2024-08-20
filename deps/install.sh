@@ -70,6 +70,7 @@ run_and_check apt install -yq make automake bison flex libtool pkg-config zip cu
 run_and_check apt install -yq libz-dev libevent-dev libssl-dev libunwind8-dev libc-ares-dev libleveldb-dev libsnappy-dev libapr1-dev libaprutil1-dev libdw-dev
 
 install_dep openmpi
+install_dep jemalloc
 if [ "$cpp_enable" = "1" ]; then
   LOG INFO "Installing cmake..."
   if [ -z "$(command -v cmake)" ]; then
@@ -88,7 +89,6 @@ if [ "$cpp_enable" = "1" ]; then
   install_dep yaml-cpp
   install_dep log4cxx
   install_dep rapidjson
-  install_dep jemalloc
   install_dep boost
 fi
 if [ "$py_enable" = "1" ]; then
