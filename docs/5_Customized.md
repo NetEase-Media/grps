@@ -581,21 +581,6 @@ context.set_err_msg("your error message");
 
 #### 3. streaming流式返回
 
-##### 配置streaming模式控制
-
-```yaml
-streaming_ctrl: # user can control if streaming and response content type.
-  ctrl_mode: # `query_param`, `header_param` or `body_param`(only json body is supported). If not set, will use `query_param`.
-  ctrl_key: # key of control parameter. If not set, will use `streaming`. (`ctrl_key`=true) means streaming.
-  res_content_type: # response content type. If not set, will use `application/octet-stream`.
-```
-
-当前还不支持完全自定义streaming的开关控制方式，提供几种控制方式供选择。
-默认情况下，streaming模式会根据```query```参数中带有```streaming=true```参数来判断。
-通过修改```ctrl_mode```可以选择```query_param```、```header_param```或```body_param```（仅支持json
-body）来控制streaming模式开关。通过修改```ctrl_key```可以选择控制参数的key，默认为```streaming```。
-默认情况下，streaming返回类型为```application/octet-stream```，通过修改```res_content_type```可以选择返回的content type。
-
 ##### 调用相关函数进行流式返回
 
 python：
@@ -623,6 +608,21 @@ context.StreamingRespondWithPostprocess()
 // 自定义http流式返回，配合自定义http模式使用
 context.CustomizedHttpStreamingRespond()
 ```
+
+##### 配置http streaming模式控制
+
+```yaml
+streaming_ctrl: # user can control if streaming and response content type.
+  ctrl_mode: # `query_param`, `header_param` or `body_param`(only json body is supported). If not set, will use `query_param`.
+  ctrl_key: # key of control parameter. If not set, will use `streaming`. (`ctrl_key`=true) means streaming.
+  res_content_type: # response content type. If not set, will use `application/octet-stream`.
+```
+
+当前还不支持完全自定义streaming的开关控制方式，提供几种控制方式供选择。
+默认情况下，streaming模式会根据```query```参数中带有```streaming=true```参数来判断。
+通过修改```ctrl_mode```可以选择```query_param```、```header_param```或```body_param```（仅支持json
+body）来控制streaming模式开关。通过修改```ctrl_key```可以选择控制参数的key，默认为```streaming```。
+默认情况下，streaming返回类型为```application/octet-stream```，通过修改```res_content_type```可以选择返回的content type。
 
 #### 4. 实现自定义http请求获取和返回
 
