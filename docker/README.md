@@ -9,7 +9,7 @@ bash archive.sh
 
 ## 构建grps
 
-### Dockerfile.grps1.1.0_cuda12.4_cudnn9.1_trtllm0.11.0_py3.10
+#### Dockerfile.grps1.1.0_cuda12.4_cudnn9.1_trtllm0.11.0_py3.10
 
 grps1.1.0 + cuda12.4 + cudnn9.1 + trtllm0.11.0 + python3.10
 
@@ -19,7 +19,7 @@ grps1.1.0 + cuda12.4 + cudnn9.1 + trtllm0.11.0 + python3.10
 docker build -t registry.cn-hangzhou.aliyuncs.com/opengrps/grps_gpu:grps1.1.0_cuda12.4_cudnn9.1_trtllm0.11.0_py3.10 -f Dockerfile.grps1.1.0_cuda12.4_cudnn9.1_trtllm0.11.0_py3.10 .
 ```
 
-### Dockerfile.grps1.1.0_cuda12.4_cudnn8.9_trtllm0.10.0_py3.10
+#### Dockerfile.grps1.1.0_cuda12.4_cudnn8.9_trtllm0.10.0_py3.10
 
 grps1.1.0 + cuda12.4 + cudnn8.9 + trtllm0.10.0 + python3.10
 
