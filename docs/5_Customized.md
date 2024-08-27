@@ -189,8 +189,8 @@ converter_register.register('your_converter', YourConverter())
 
 #### 4. 自定义推理器
 
-修改customized_inferer.py源码文件，继承```grps_framework.model_inferer.inferer.ModelInferer```
-类实现自己的自定义推理器。<br>
+通过配置方式可以直接选择使用内置推理后端，具体见[NN推理后端](./7_InternalInferer.md)。或者通过实现customized_inferer.py源码文件，继承```grps_framework.model_inferer.inferer.ModelInferer```
+类实现自己的自定义推理后端。<br>
 
 ```python
 class YourInferer(ModelInferer):
@@ -400,7 +400,7 @@ REGISTER_CONVERTER(YourConverter, your_converter); // Register your converter.
 
 #### 4. 自定义推理器
 
-修改customized_inferer.cc/.h源码文件，继承```netease::grps::ModelInferer```类实现自己的自定义推理器。<br>
+通过配置方式可以直接选择使用内置推理后端，具体见[NN推理后端](./7_InternalInferer.md)。或者通过实现customized_inferer.cc/.h源码文件，继承```netease::grps::ModelInferer```类实现自己的自定义推理后端。<br>
 
 ```c++
 class YourInferer : public ModelInferer {
