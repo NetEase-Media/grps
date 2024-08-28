@@ -727,8 +727,7 @@ dag:
     * inferer_path：模型路径。
     * inferer_args：模型推理器inferer的更多参数，会透传给inferer的init函数。
         * customized_op_paths：自定义op路径。
-    *
-  converter_type：前后处理converter类型，支持torch、tensorflow、tensorrt、customized、none，none代表无converter模式，一次推理将跳过converter的前后处理环节。
+    * converter_type：前后处理converter类型，支持torch、tensorflow、tensorrt、customized、none，none代表无converter模式，一次推理将跳过converter的前后处理环节。
     * converter_name：自定义前后处理converter名称，当converter_type为customized时需要指定已经注册的自定义converter名称。
     * converter_path：前后处理converter相关数据文件路径。
     * converter_args：前后处理converter的更多参数，会透传给converter的init函数。
