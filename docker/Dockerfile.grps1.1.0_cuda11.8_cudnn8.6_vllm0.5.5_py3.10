@@ -1,0 +1,60 @@
+# copyright : netease news pctr team
+# author    : zhaochaochao@corp.netease.com
+# date      : 2024-08-28
+# brief     : Build the grps1.1.0 docker image with cuda11.8 + cudnn8.6 + vllm0.5.5 + py3.10
+
+FROM nvcr.io/nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
+LABEL version="1.1.0"
+
+WORKDIR /root/
+
+ENV TMP=/tmp
+ENV CUDA_ROOT=/usr/local/cuda
+ENV LD_LIBRARY_PATH=/usr/local/cuda/targets/x86_64-linux/lib/:$LD_LIBRARY_PATH
+
+RUN apt-get update -yq && \
+    apt-get install -yq vim tree wget figlet lolcat git && \
+    apt-get install -yq make automake bison flex libtool pkg-config zip curl lsof build-essential && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# python3
+RUN apt-get update -yq && \
+    apt install -y python3 python3-distutils python3-dev && \
+    ln /usr/bin/python3 /usr/bin/python && \
+    wget https://bootstrap.pypa.io/get-pip.py && \
+    python3 get-pip.py && \
+    rm -rf get-pip.py
+
+# install vllm
+RUN export VLLM_VERSION=0.5.5 && \
+    export PYTHON_VERSION=310 && \
+    wget https://github.com/vllm-project/vllm/releases/download/v${VLLM_VERSION}/vllm-${VLLM_VERSION}+cu118-cp${PYTHON_VERSION}-cp${PYTHON_VERSION}-manylinux1_x86_64.whl && \
+    pip install vllm-${VLLM_VERSION}+cu118-cp${PYTHON_VERSION}-cp${PYTHON_VERSION}-manylinux1_x86_64.whl --extra-index-url https://download.pytorch.org/whl/cu118 && \
+    rm -rf vllm-${VLLM_VERSION}+cu118-cp${PYTHON_VERSION}-cp${PYTHON_VERSION}-manylinux1_x86_64.whl .cache
+
+# setup timezone
+ENV TZ=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+RUN apt update
+RUN apt install -y tzdata
+
+# install grps
+ENV LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH
+ADD deps.tar.gz /tmp/
+RUN cd /tmp/deps/ && \
+    bash install.sh 0 1 0 && \
+    rm -rf /tmp/deps
+ADD grps.tar.gz /tmp/
+RUN cd /tmp/grps && \
+    echo "cuda_enable=1" > .config && \
+    echo "py_enable=1" >> .config && \
+    bash grps_install.sh --skip_deps && \
+    cd - && \
+    rm -rf /tmp/grps && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+ENV GRPST_HOME=/usr/local/grpst
+ENV PATH=$PATH:$GRPST_HOME
+
+RUN echo "figlet grps | /usr/games/lolcat -p 1" >> /etc/bash.bashrc
