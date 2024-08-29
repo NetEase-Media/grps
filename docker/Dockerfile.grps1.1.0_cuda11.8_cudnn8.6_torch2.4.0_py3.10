@@ -68,7 +68,7 @@ RUN cd /tmp/grps && \
     if [ $CPP_ENABLE -eq 1 ]; then \
         echo "cpp_enable=1" >> .config; \
     fi && \
-    if [ $CPP_ENABLE -eq 1 -a $TORCH_ENABLE -eq 1 ]; then \
+    if [ $CPP_ENABLE -eq 1 ]; then \
         echo "cpp_torch_enable=1" >> .config && echo "libtorch_path=$LIB_TORCH_PATH" >> .config; \
     fi && \
     if [ $CPP_ENABLE -eq 1 -a $TF_ENABLE -eq 1 ]; then \
