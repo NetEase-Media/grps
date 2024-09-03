@@ -148,6 +148,17 @@ while true; do
       fi
     done <<< "$(tail -n 30 ${log_dir}/grps_server.log)"
   fi
+  if [ -e "${log_dir}/grps_usr.log" ]; then
+    while read -r line; do
+      log_time_str=$(echo "$line" | awk '{print $1"_"$2}')
+      if [[ ! "$log_time_str" =~ ^[0-9]{8}_[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]{3} ]]; then
+        continue
+      fi
+      if [ "$log_time_str" \> "$end_time_str" -a "$line" != "" ]; then
+        echo "$line"
+      fi
+    done <<< "$(tail -n 30 ${log_dir}/grps_usr.log)"
+  fi
   end_time_str=$(date '+%Y%m%d_%H:%M:%S.%3N') # Used to show new log.
 
   # Check if server started failed.
