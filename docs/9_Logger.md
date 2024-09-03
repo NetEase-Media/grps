@@ -8,7 +8,7 @@ grps服务日志包含两部分，一部分是服务日志，另一部分是用�
 
 ## 快捷部署
 
-通过```grpst tf_serve/torch_serve```的参数实现，如下参数：
+通过```grpst tf_serve/torch_serve/trt_serve```的参数实现，如下参数：
 
 ```bash
 --log_dir ./log  # 设置日志目录，如果是相对路径，则路径在模型部署路径下，使用grpst ps命令查看部署路径。
