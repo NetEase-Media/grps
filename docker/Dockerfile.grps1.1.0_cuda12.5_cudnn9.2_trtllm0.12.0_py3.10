@@ -1,9 +1,9 @@
 # copyright : Copyright 2022 netease. All rights reserved.
 # author    : zhaochaochao@corp.netease.com
 # date      : 2024-08-19
-# brief     : Build the grps1.1.0 docker image with cuda12.4 + cudnn9.1 + trtllm0.11.0 + py3.10
+# brief     : Build the grps1.1.0 docker image with cuda12.5 + cudnn9.2 + trtllm0.12.0 + py3.10
 
-FROM nvcr.io/nvidia/tritonserver:24.07-trtllm-python-py3
+FROM nvcr.io/nvidia/tritonserver:24.08-trtllm-python-py3
 LABEL version="1.1.0"
 
 WORKDIR /root/

@@ -50,20 +50,20 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
 
 # jinja2cpp
-RUN git clone https://github.com/jinja2cpp/Jinja2Cpp.git && \
-    cd Jinja2Cpp && \
-    git checkout 1.2.1 && \
-    sed -i '62s/.*/endif()/' ././cmake/public/jinja2cpp-config.cmake.in && \
-    sed -i '61s/.*/target_compile_definitions(jinja2cpp INTERFACE -DJINJA2CPP_LINK_AS_SHARED)/' ./cmake/public/jinja2cpp-config.cmake.in && \
-    mkdir build && \
-    cd build && \
-    cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local/jinja2cpp -DJINJA2CPP_DEPS_MODE=internal \
-    -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=TRUE -DJINJA2CPP_BUILD_SHARED=TRUE \
-    -DCMAKE_BUILD_TYPE=RelWithDebugInfo -DCMAKE_CXX_STANDARD=17 && \
-    cmake --build . --target install -j12 && \
-    rm -rf /usr/local/jinja2cpp/include/boost && \
-    cd ../../ && \
-    rm -rf Jinja2Cpp
+#RUN git clone https://github.com/jinja2cpp/Jinja2Cpp.git && \
+#    cd Jinja2Cpp && \
+#    git checkout 1.2.1 && \
+#    sed -i '62s/.*/endif()/' ././cmake/public/jinja2cpp-config.cmake.in && \
+#    sed -i '61s/.*/target_compile_definitions(jinja2cpp INTERFACE -DJINJA2CPP_LINK_AS_SHARED)/' ./cmake/public/jinja2cpp-config.cmake.in && \
+#    mkdir build && \
+#    cd build && \
+#    cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local/jinja2cpp -DJINJA2CPP_DEPS_MODE=internal \
+#    -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=TRUE -DJINJA2CPP_BUILD_SHARED=TRUE \
+#    -DCMAKE_BUILD_TYPE=RelWithDebugInfo -DCMAKE_CXX_STANDARD=17 && \
+#    cmake --build . --target install -j12 && \
+#    rm -rf /usr/local/jinja2cpp/include/boost && \
+#    cd ../../ && \
+#    rm -rf Jinja2Cpp
 
 # setup timezone
 ENV TZ=Asia/Shanghai
