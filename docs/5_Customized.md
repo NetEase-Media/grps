@@ -840,7 +840,7 @@ grpst archive ./
 
 ## 部署
 
-使用```grpst start```命令进行部署，部署成功后会默认跟踪服务日志，通过```ctrl + c```可以退出跟踪。
+使用```grpst start```命令进行部署，部署成功后会默认跟踪服务日志，通过```ctrl + c```可以退出跟踪。如需修改端口、接口模式等服务参数，可以修改```server.yml```配置文件，跟上```--server_conf=./conf/server.yml```参数，可以跳过重新构建直接部署。
 
 ```bash
 grpst start server.mar
