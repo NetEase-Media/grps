@@ -3,6 +3,8 @@
 # date      : 2024-08-19
 # brief     : Build the grps1.1.0 docker image with cuda12.5 + cudnn9.2 + trtllm0.12.0 + py3.10
 
+FROM nvcr.io/nvidia/pytorch:24.07-py3 AS pytorch_base
+
 FROM nvcr.io/nvidia/tritonserver:24.08-trtllm-python-py3
 LABEL version="1.1.0"
 
@@ -89,5 +91,21 @@ RUN cd /tmp/grps && \
     rm -rf /var/lib/apt/lists/*
 ENV GRPST_HOME=/usr/local/grpst
 ENV PATH=$PATH:$GRPST_HOME
+
+# opencv3.4
+RUN wget https://github.com/opencv/opencv/archive/refs/tags/3.4.19.tar.gz && \
+    tar -xvf 3.4.19.tar.gz && \
+    cd opencv-3.4.19 && \
+    mkdir build && \
+    cd build && \
+    cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-fPIC" -DCMAKE_C_FLAGS="-fPIC" && \
+    make -j12 && \
+    make install && \
+    cd ../../ && \
+    rm -rf opencv-3.4.19 3.4.19.tar.gz
+
+# torch-vision
+COPY --from=pytorch_base /usr/local/lib/python3.10/dist-packages/torchvision /usr/local/lib/python3.10/dist-packages/torchvision
+COPY --from=pytorch_base /usr/local/lib/python3.10/dist-packages/torchvision-0.19.0a0.dist-info /usr/local/lib/python3.10/dist-packages/torchvision-0.19.0a0.dist-info
 
 RUN echo "figlet grps | /usr/games/lolcat -p 1" >> /etc/bash.bashrc
