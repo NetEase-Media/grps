@@ -4,7 +4,8 @@
 # Brief  Project stop tools.
 import os.path
 
-from common import utils
+
+# from common import utils
 
 
 class GrpsProjectStopper(object):
@@ -50,20 +51,20 @@ class GrpsProjectStopper(object):
             return -1
 
         # Lock work dir.
-        lock_file = self.__grps_server_work_dir + '.lock'
-        lock_file_fd = utils.file_lock(lock_file)
-        if not lock_file_fd:
-            print('Server({}) has been locked. You can start another grps server with your server name.'.format(
-                args.server_name))
-            return -1
+        # lock_file = self.__grps_server_work_dir + '.lock'
+        # lock_file_fd = utils.file_lock(lock_file)
+        # if not lock_file_fd:
+        #     print('Server({}) has been locked. You can start another grps server with your server name.'.format(
+        #         args.server_name))
+        #     return -1
 
         print('>>>> Stopping server({})...'.format(args.server_name))
         if not self.__stop_server():
             print('Stop server({}) failed.'.format(args.server_name))
-            utils.file_unlock(lock_file_fd, lock_file)
+            # utils.file_unlock(lock_file_fd, lock_file)
             return -1
         print('>>>> Stop server({}) success.'.format(args.server_name))
 
         # Unlock work dir.
-        utils.file_unlock(lock_file_fd, lock_file)
+        # utils.file_unlock(lock_file_fd, lock_file)
         return 0
