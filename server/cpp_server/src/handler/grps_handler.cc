@@ -400,13 +400,9 @@ static void CustomizedPredictHttp(brpc::Controller* cntl,
   if (is_streaming) {
     cntl->http_response().set_content_type(
       GlobalConfig::Instance().server_config().interface.customized_predict_http.streaming_ctrl.res_content_type);
-    // done_guard reset will clear cntl->request_attachment(), so we need to save it.
-    butil::IOBuf tmp;
-    tmp.append(cntl->request_attachment().movable());
     auto pa = cntl->CreateProgressiveAttachment();
-    done_guard.reset(nullptr);
-    cntl->request_attachment().append(tmp.movable()); // restore cntl->request_attachment().
     auto ctx_sp = std::make_shared<GrpsContext>(&req, nullptr, &pa, cntl);
+    ctx_sp->set_http_stream_done_guard(&done_guard);
     auto& ctx = *ctx_sp;
     try {
       Executor::Instance().Infer(req, res, ctx_sp, model_name);

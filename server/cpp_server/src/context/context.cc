@@ -96,6 +96,11 @@ void GrpsContext::CustomizedHttpStreamingRespond(const void* data, size_t size, 
     return;
   }
 
+  if (http_stream_done_guard_ && !http_stream_done_guard_->empty()) {
+    // Start streaming respond.
+    http_stream_done_guard_->reset(nullptr);
+  }
+
   if (http_controller_ == nullptr) {
     throw std::runtime_error("CustomizedHttpStreamingRespond should only be used with customized http");
   }

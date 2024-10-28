@@ -188,7 +188,9 @@ public:
 
   // Streaming respond when using streaming request and customized predict http.
   // Multi-thread safe.
-  // NOTE: If final is true, that means the msg is the last message of the streaming response. Your should never
+  // NOTE:
+  // After first CustomizedHttpStreamingRespond call, you will not be able to use http_controller_ anymore.
+  // If final is true, that means the msg is the last message of the streaming response. Your should never
   // respond any message after that. In batching request mode, you should never use request message and output
   // message anymore, those will be invalid.
   void CustomizedHttpStreamingRespond(const void* data, size_t size, bool final = false);
@@ -234,6 +236,11 @@ public:
   // If connection with client is broken.
   [[nodiscard]] bool IfDisconnected();
 
+  // [Only call by grps framework] Set http_stream_done_guard.
+  void set_http_stream_done_guard(brpc::ClosureGuard* http_stream_done_guard) {
+    http_stream_done_guard_ = http_stream_done_guard;
+  }
+
 private:
   // request.
   const ::grps::protos::v1::GrpsMessage* request_;
@@ -241,6 +248,7 @@ private:
   // streaming writer.
   ::grpc::ServerWriter<::grps::protos::v1::GrpsMessage>* rpc_stream_writer_;
   butil::intrusive_ptr<brpc::ProgressiveAttachment>* http_stream_writer_;
+  brpc::ClosureGuard* http_stream_done_guard_ = nullptr;
   bool streaming_end_ = false;
   std::mutex streaming_mutex_;
   std::atomic<bool> http_streaming_writer_close_ = false;
