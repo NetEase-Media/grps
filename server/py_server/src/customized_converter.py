@@ -41,7 +41,7 @@ class YourConverter(Converter):
             Exception: If preprocess failed, can raise exception and exception will be caught by server and return error
             message to client.
         """
-        # your can set context for current request like，value can be any type:
+        # your can set context for current request like, value can be any type:
         context.put_user_data('key', 'value')
 
         # preprocess request and convert to tensors.
@@ -68,10 +68,10 @@ class YourConverter(Converter):
 
         out = GrpsMessage()
         # postprocess tensors and convert to response.
-        # add your codes here like:
+        # set string data like:
         out.str_data = 'hello grps.'  # add string data.
 
-        # add generic tensor([[1.0, 2.0, 3.0]] like:
+        # set generic tensor([[1.0, 2.0, 3.0]] like:
         # gtensor = GenericTensor(name='tensor_name', dtype=DataType.DT_FLOAT32, shape=[1, 3], flat_float32=[1, 2, 3])
         # out.gtensors.tensors.append(gtensor)
         return out

@@ -473,13 +473,13 @@ class GrpsProjectArchiver(object):
             return False
         subprocess.call('cp -r {}/* {}/'.format(src_path_src, src_path_dst), shell=True)
 
-        # 4. append requirements.txt
+        # 4. Override requirements.txt
         requirements_path_src = os.path.join(project_path, 'requirements.txt')
         requirements_path_dst = os.path.join(server_work_dir, 'requirements.txt')
         if not os.path.exists(requirements_path_src):
             print('requirements {} not exist.'.format(requirements_path_src))
             return False
-        subprocess.call('cat {} >> {}'.format(requirements_path_src, requirements_path_dst), shell=True)
+        shutil.copyfile(requirements_path_src, requirements_path_dst)
 
         return True
 

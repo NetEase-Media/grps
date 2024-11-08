@@ -1,4 +1,9 @@
 # Customized deep learning model inferer. Including model load and model infer.
+import os
+import sys
+
+# Add src dir to sys.path
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 import time
 

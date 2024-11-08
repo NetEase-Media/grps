@@ -21,8 +21,7 @@ class MyTestCase(GrpsTest):
         # Add your codes to set input as follows:
         # grps_in.str_data = 'hello grps'
         # grps_in.bin_data = b'hello grps'
-        # grps_in.gtensors.names.append('inp')
-        # gtensor = GenericTensor(dtype=DataType.DT_FLOAT32, shape=[1, 2], flat_float32=[1, 2])
+        # gtensor = GenericTensor(name='inp', dtype=DataType.DT_FLOAT32, shape=[1, 2], flat_float32=[1, 2])
         # grps_in.gtensors.tensors.append(gtensor)
 
         # Infer.
@@ -34,8 +33,7 @@ class MyTestCase(GrpsTest):
         # Check your result as follows:
         # self.assertEqual(grps_out.str_data, 'hello grps')
         # self.assertEqual(grps_out.bin_data, b'hello grps')
-        # self.assertEqual(grps_out.gtensors.names[0], 'inp')
-        # gtensor = GenericTensor(dtype=DataType.DT_FLOAT32, shape=[1, 2], flat_float32=[1, 2])
+        # gtensor = GenericTensor(name='inp', dtype=DataType.DT_FLOAT32, shape=[1, 2], flat_float32=[1, 2])
         # self.assertEqual(grps_out.gtensors.tensors[0], gtensor)
 
 
