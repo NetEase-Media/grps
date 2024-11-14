@@ -1,0 +1,85 @@
+# copyright : netease news pctr team
+# author    : zhaochaochao@corp.netease.com
+# date      : 2024-08-29
+# brief     : Build the grps1.1.0 docker image with cuda12.1 + cudnn8.9 + torch2.5.1 + py3.10
+
+FROM nvcr.io/nvidia/cuda:12.1.0-cudnn8-devel-ubuntu22.04
+LABEL version="1.1.0"
+
+ARG PY_ENABLE=1
+ARG CPP_ENABLE=1
+
+WORKDIR /root/
+
+ENV TMP=/tmp
+ENV CUDA_ROOT=/usr/local/cuda
+ENV LD_LIBRARY_PATH=/usr/local/cuda/targets/x86_64-linux/lib/:$LD_LIBRARY_PATH
+
+RUN apt-get update -yq && \
+    apt-get install -yq vim tree wget figlet lolcat git && \
+    apt-get install -yq make automake bison flex libtool pkg-config zip curl lsof build-essential && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# python3
+RUN apt-get update -yq && \
+    apt install -y python3 python3-distutils python3-dev && \
+    ln /usr/bin/python3 /usr/bin/python && \
+    wget https://bootstrap.pypa.io/get-pip.py && \
+    python3 get-pip.py && \
+    rm -rf get-pip.py
+
+# install libtorch
+RUN if [ $CPP_ENABLE -eq 1 ]; then \
+        wget https://download.pytorch.org/libtorch/cu121/libtorch-cxx11-abi-shared-with-deps-2.5.1%2Bcu121.zip && \
+        unzip libtorch-cxx11-abi-shared-with-deps-2.5.1+cu121.zip && \
+        mv libtorch /usr/local/libtorch && \
+        rm -rf libtorch-cxx11-abi-shared-with-deps-2.5.1+cu121.zip; \
+    fi
+
+# install pytorch
+RUN if [ $PY_ENABLE -eq 1 ]; then \
+        wget https://download.pytorch.org/whl/cu121/torch-2.5.1%2Bcu121-cp310-cp310-linux_x86_64.whl && \
+        pip3 install torch-2.5.1+cu121-cp310-cp310-linux_x86_64.whl && \
+        pip3 install torchvision==0.20.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cu121 && \
+        rm -rf torch-2.5.1+cu121-cp310-cp310-linux_x86_64.whl && \
+        rm -rf .cache; \
+    fi
+
+# setup timezone
+ENV TZ=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+RUN apt update
+RUN apt install -y tzdata
+
+# install grps
+ENV LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH
+ENV LIB_TORCH_PATH=/usr/local/libtorch
+ADD deps.tar.gz /tmp/
+RUN cd /tmp/deps/ && \
+    bash install.sh $CPP_ENABLE 1 0 && \
+    rm -rf /tmp/deps
+ADD grps.tar.gz /tmp/
+RUN cd /tmp/grps && \
+    echo "cuda_enable=1" > .config && \
+    if [ $PY_ENABLE -eq 1 ]; then \
+        echo "py_enable=1" >> .config; \
+    fi && \
+    if [ $CPP_ENABLE -eq 1 ]; then \
+        echo "cpp_enable=1" >> .config; \
+    fi && \
+    if [ $CPP_ENABLE -eq 1 ]; then \
+        echo "cpp_torch_enable=1" >> .config && echo "libtorch_path=$LIB_TORCH_PATH" >> .config; \
+    fi && \
+    if [ $CPP_ENABLE -eq 1 -a $TF_ENABLE -eq 1 ]; then \
+        echo "cpp_tf_enable=1" >> .config && echo "libtensorflow_path=$LIB_TF_PATH" >> .config; \
+    fi && \
+    bash grps_install.sh --skip_deps && \
+    cd - && \
+    rm -rf /tmp/grps && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+ENV GRPST_HOME=/usr/local/grpst
+ENV PATH=$PATH:$GRPST_HOME
+
+RUN echo "figlet grps | /usr/games/lolcat -p 1" >> /etc/bash.bashrc

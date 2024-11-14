@@ -12,6 +12,7 @@
 ### torch
 
 * registry.cn-hangzhou.aliyuncs.com/opengrps/grps_gpu:grps1.1.0_cuda11.8_cudnn8.6_torch2.4.0_py3.10
+* registry.cn-hangzhou.aliyuncs.com/opengrps/grps_gpu:grps1.1.0_cuda12.1_cudnn8.9_torch2.5.1_py3.10
 
 ### tensorrt
 
