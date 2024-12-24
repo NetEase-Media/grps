@@ -11,6 +11,16 @@ bash archive.sh
 
 ### tensorrt-llm
 
+#### Dockerfile.grps1.1.0_cuda12.6_cudnn9.6_trtllm0.16.0_py3.12
+
+grps1.1.0 + cuda12.6 + cudnn9.6 + trtllm0.16.0 + python3.12
+
+```bash
+# 可以跟上如下参数
+# --build-arg https_proxy=http://ip:port --build-arg http_proxy=http://ip:port参数用于设置代理
+docker build -t registry.cn-hangzhou.aliyuncs.com/opengrps/grps_gpu:grps1.1.0_cuda12.6_cudnn9.6_trtllm0.16.0_py3.12 -f Dockerfile.grps1.1.0_cuda12.6_cudnn9.6_trtllm0.16.0_py3.12 .
+```
+
 #### Dockerfile.grps1.1.0_cuda12.5_cudnn9.2_trtllm0.12.0_py3.10
 
 grps1.1.0 + cuda12.5 + cudnn9.2 + trtllm0.12.0 + python3.10

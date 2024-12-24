@@ -1,0 +1,136 @@
+# copyright : Copyright 2022 netease. All rights reserved.
+# author    : zhaochaochao@corp.netease.com
+# date      : 2024-12-19
+# brief     : Build the grps1.1.0 docker image with cuda12.6 + cudnn9.6 + trtllm0.16.0 + py3.12
+
+FROM nvcr.io/nvidia/tritonserver:24.12-trtllm-python-py3
+LABEL version="1.1.0"
+
+WORKDIR /root/
+
+ENV TMP=/tmp
+ENV CUDA_ROOT=/usr/local/cuda
+ENV LD_LIBRARY_PATH=/usr/local/cuda/targets/x86_64-linux/lib/:$LD_LIBRARY_PATH
+
+RUN apt-get update -yq && \
+    apt-get install -yq vim tree wget figlet lolcat git && \
+    apt-get install -yq make automake bison flex libtool pkg-config zip curl lsof build-essential && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# cmake-3.29.3
+RUN rm -rf /usr/local/bin/cmake && \
+    wget https://github.com/Kitware/CMake/releases/download/v3.29.3/cmake-3.29.3-Linux-x86_64.sh && \
+    bash ./cmake-3.29.3-Linux-x86_64.sh --prefix=/usr/ --skip-license && \
+    rm -rf ./cmake-3.29.3-Linux-x86_64.sh
+
+# rm old and install protobuf-3.9.2
+RUN rm -f /usr/bin/protoc && \
+    rm -rf /usr/lib/x86_64-linux-gnu/libprotobuf* /usr/lib/x86_64-linux-gnu/libprotoc* && \
+    rm -rf /usr/lib/libprotobuf* /usr/lib/libprotoc* && \
+    rm -rf /usr/lib/cmake/protobuf && \
+    rm -rf /usr/include/google && \
+    wget https://github.com/protocolbuffers/protobuf/archive/refs/tags/v3.9.2.tar.gz && \
+    tar -xvf v3.9.2.tar.gz && \
+    cd protobuf-3.9.2 && \
+    ./autogen.sh && \
+    ./configure --prefix=/usr/local CXXFLAGS=-fPIC CFLAGS=-fPIC && \
+    autoreconf -f -i && \
+    make clean && \
+    make _GLIBCXX_USE_CXX11_ABI=1 -j12 && \
+    make install && \
+    make clean && \
+    cd - && \
+    rm -rf protobuf-3.9.2 v3.9.2.tar.gz
+
+# rm old gflags.
+RUN rm -rf /usr/include/gflags && \
+    rm -rf /usr/lib/x86_64-linux-gnu/libgflags*
+
+# rust
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+# jinja2cpp
+#RUN git clone https://github.com/jinja2cpp/Jinja2Cpp.git && \
+#    cd Jinja2Cpp && \
+#    git checkout 1.2.1 && \
+#    sed -i '62s/.*/endif()/' ././cmake/public/jinja2cpp-config.cmake.in && \
+#    sed -i '61s/.*/target_compile_definitions(jinja2cpp INTERFACE -DJINJA2CPP_LINK_AS_SHARED)/' ./cmake/public/jinja2cpp-config.cmake.in && \
+#    mkdir build && \
+#    cd build && \
+#    cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local/jinja2cpp -DJINJA2CPP_DEPS_MODE=internal \
+#    -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=TRUE -DJINJA2CPP_BUILD_SHARED=TRUE \
+#    -DCMAKE_BUILD_TYPE=RelWithDebugInfo -DCMAKE_CXX_STANDARD=17 && \
+#    cmake --build . --target install -j12 && \
+#    rm -rf /usr/local/jinja2cpp/include/boost && \
+#    cd ../../ && \
+#    rm -rf Jinja2Cpp
+
+# opencv3.4
+RUN wget https://github.com/opencv/opencv/archive/refs/tags/3.4.19.tar.gz && \
+    tar -xvf 3.4.19.tar.gz && \
+    cd opencv-3.4.19 && \
+    mkdir build && \
+    cd build && \
+    cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-fPIC" -DCMAKE_C_FLAGS="-fPIC" && \
+    make -j12 && \
+    make install && \
+    cd ../../ && \
+    rm -rf opencv-3.4.19 3.4.19.tar.gz
+
+# reinstall some pip because protobuf lib change.
+RUN pip uninstall protobuf -y && \
+    pip install protobuf==3.20.3 && \
+    pip uninstall pyarrow -y && \
+    pip install pyarrow && \
+    pip uninstall onnx -y && \
+    pip install onnx && \
+    rm -rf .cache
+
+# install xtensor.
+RUN wget https://github.com/xtensor-stack/xtl/archive/refs/tags/0.7.7.tar.gz && \
+    tar -xvf 0.7.7.tar.gz && \
+    cd xtl-0.7.7 && \
+    mkdir build && \
+    cd build && \
+    cmake .. -DCMAKE_CXX_FLAGS="-fPIC" -DCMAKE_C_FLAGS="-fPIC" && \
+    make install && \
+    cd ../../ && \
+    rm -rf xtl-0.7.7 0.7.7.tar.gz && \
+    wget https://github.com/xtensor-stack/xtensor/archive/refs/tags/0.25.0.tar.gz && \
+    tar -xvf 0.25.0.tar.gz && \
+    cd xtensor-0.25.0 && \
+    mkdir build && \
+    cd build && \
+    cmake .. -DCMAKE_CXX_FLAGS="-fPIC" -DCMAKE_C_FLAGS="-fPIC" && \
+    make install && \
+    cd ../../ && \
+    rm -rf xtensor-0.25.0 0.25.0.tar.gz
+
+# setup timezone
+ENV TZ=Asia/Shanghai
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+RUN apt update
+RUN apt install -y tzdata
+
+# install grps
+ENV LD_LIBRARY_PATH=/usr/local/lib/:$LD_LIBRARY_PATH
+ADD deps.tar.gz /tmp/
+RUN cd /tmp/deps/ && \
+    bash install.sh 1 0 0 && \
+    rm -rf /tmp/deps
+ADD grps.tar.gz /tmp/
+RUN cd /tmp/grps && \
+    echo "cuda_enable=1" > .config && \
+    echo "py_enable=0" >> .config; \
+    echo "cpp_enable=1" >> .config; \
+    bash grps_install.sh --skip_deps && \
+    cd - && \
+    rm -rf /tmp/grps && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+ENV GRPST_HOME=/usr/local/grpst
+ENV PATH=$PATH:$GRPST_HOME
+
+RUN echo "figlet grps | /usr/games/lolcat -p 1" >> /etc/bash.bashrc
