@@ -184,7 +184,7 @@ int main(int argc, char** argv) {
       brpc::ServerOptions options;
       options.idle_timeout_sec = FLAGS_idle_timeout_sec;
       options.max_concurrency = server_config.max_connections;
-      options.num_threads = server_config.max_concurrency + 1;
+      options.num_threads = server_config.max_concurrency + 16;
       options.pid_file = FLAGS_pid_file;
       options.has_builtin_services = false;
       GrpsBrpcServiceImpl grps_service(GrpsBrpcServiceImpl::HandlerType::kRPC);
@@ -246,7 +246,7 @@ int main(int argc, char** argv) {
   brpc::ServerOptions options;
   options.idle_timeout_sec = FLAGS_idle_timeout_sec;
   options.max_concurrency = server_config.max_connections;
-  options.num_threads = server_config.max_concurrency + 1;
+  options.num_threads = server_config.max_concurrency + 16;
   options.pid_file = FLAGS_pid_file;
   options.has_builtin_services = false;
   GrpsBrpcServiceImpl grps_service(GrpsBrpcServiceImpl::HandlerType::kHTTP);
