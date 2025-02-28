@@ -120,10 +120,13 @@ ADD deps.tar.gz /tmp/
 RUN cd /tmp/deps/ && \
     bash install.sh 1 0 0 && \
     rm -rf /tmp/deps
+RUN apt remove -y python3-blinker && \
+    pip install blink && \
+    rm -rf .cache
 ADD grps.tar.gz /tmp/
 RUN cd /tmp/grps && \
     echo "cuda_enable=1" > .config && \
-    echo "py_enable=0" >> .config; \
+    echo "py_enable=1" >> .config; \
     echo "cpp_enable=1" >> .config; \
     bash grps_install.sh --skip_deps && \
     cd - && \
