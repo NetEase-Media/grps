@@ -85,7 +85,7 @@ optional arguments:
 ### 部署工程
 
 ```
-usage: grpst start [-h] [--name NAME] [--inference_conf INFERENCE_CONF] [--server_conf SERVER_CONF] [--timeout TIMEOUT] [--mpi_np MPI_NP] mar_path
+usage: grpst start [-h] [--name NAME] [--inference_conf INFERENCE_CONF] [--server_conf SERVER_CONF] [--timeout TIMEOUT] [--mpi_np MPI_NP] [--no_logging] mar_path
 
 positional arguments:
   mar_path              model server archive path
@@ -99,6 +99,7 @@ options:
                         server conf path, will use server.yml in mar(mar_path arg) if not set
   --timeout TIMEOUT     server start timeout, default is 300s
   --mpi_np MPI_NP       mpi process count, default is 1 and will not use mpi.
+  --no_logging          not trace logs after start.
 ```
 
 ### 快速部署tensorflow模型服务
@@ -107,7 +108,7 @@ options:
 usage: grpst tf_serve [-h] [--name NAME] [--interface_framework {http,http+grpc,http+brpc}] [--port PORT] [--customized_predict_http_path CUSTOMIZED_PREDICT_HTTP_PATH] [--device DEVICE]
                       [--batching_type BATCHING_TYPE] [--max_batch_size MAX_BATCH_SIZE] [--batch_timeout_us BATCH_TIMEOUT_US] [--max_connections MAX_CONNECTIONS] [--max_concurrency MAX_CONCURRENCY]
                       [--gpu_devices_idx GPU_DEVICES_IDX] [--gpu_mem_limit_mib GPU_MEM_LIMIT_MIB] [--customized_op_paths CUSTOMIZED_OP_PATHS] [--log_dir LOG_DIR] [--log_backup_count LOG_BACKUP_COUNT]
-                      [--output_path OUTPUT_PATH] [--timeout TIMEOUT]
+                      [--output_path OUTPUT_PATH] [--timeout TIMEOUT] [--no_logging]
                       model_path
 
 positional arguments:
@@ -145,6 +146,7 @@ optional arguments:
   --output_path OUTPUT_PATH
                         project will be archived to this path, default is empty and will not archive
   --timeout TIMEOUT     server start timeout, default is 300s
+  --no_logging          not trace logs after start.
 ```
 
 ### 快速部署torch模型服务
@@ -153,7 +155,7 @@ optional arguments:
 usage: grpst torch_serve [-h] [--name NAME] [--interface_framework {http,http+grpc,http+brpc}] [--port PORT] [--customized_predict_http_path CUSTOMIZED_PREDICT_HTTP_PATH] [--device DEVICE]
                          [--inp_device INP_DEVICE] [--batching_type BATCHING_TYPE] [--max_batch_size MAX_BATCH_SIZE] [--batch_timeout_us BATCH_TIMEOUT_US] [--max_connections MAX_CONNECTIONS]
                          [--max_concurrency MAX_CONCURRENCY] [--gpu_devices_idx GPU_DEVICES_IDX] [--gpu_mem_limit_mib GPU_MEM_LIMIT_MIB] [--gpu_mem_gc_enable] [--gpu_mem_gc_interval GPU_MEM_GC_INTERVAL]
-                         [--customized_op_paths CUSTOMIZED_OP_PATHS] [--log_dir LOG_DIR] [--log_backup_count LOG_BACKUP_COUNT] [--output_path OUTPUT_PATH] [--timeout TIMEOUT]
+                         [--customized_op_paths CUSTOMIZED_OP_PATHS] [--log_dir LOG_DIR] [--log_backup_count LOG_BACKUP_COUNT] [--output_path OUTPUT_PATH] [--timeout TIMEOUT] [--no_logging]
                          model_path
 
 positional arguments:
@@ -196,6 +198,7 @@ optional arguments:
   --output_path OUTPUT_PATH
                         project will be archived to this path, default is empty and will not archive
   --timeout TIMEOUT     server start timeout, default is 300s
+  --no_logging          not trace logs after start.
 ```
 
 ### 快速部署tensorrt模型服务
@@ -204,7 +207,7 @@ optional arguments:
 usage: grpst trt_serve [-h] [--name NAME] [--interface_framework {http,http+grpc,http+brpc}] [--port PORT] [--customized_predict_http_path CUSTOMIZED_PREDICT_HTTP_PATH] [--device DEVICE]
                        [--streams STREAMS] [--batching_type BATCHING_TYPE] [--max_batch_size MAX_BATCH_SIZE] [--batch_timeout_us BATCH_TIMEOUT_US] [--max_connections MAX_CONNECTIONS]
                        [--max_concurrency MAX_CONCURRENCY] [--gpu_devices_idx GPU_DEVICES_IDX] [--customized_op_paths CUSTOMIZED_OP_PATHS] [--log_dir LOG_DIR] [--log_backup_count LOG_BACKUP_COUNT]
-                       [--output_path OUTPUT_PATH] [--timeout TIMEOUT]
+                       [--output_path OUTPUT_PATH] [--timeout TIMEOUT] [--no_logging]
                        model_path
 
 positional arguments:
@@ -241,6 +244,7 @@ optional arguments:
   --output_path OUTPUT_PATH
                         project will be archived to this path, default is empty and will not archive
   --timeout TIMEOUT     server start timeout, default is 300s
+  --no_logging          not trace logs after start.
 ```
 
 ### 查看状态

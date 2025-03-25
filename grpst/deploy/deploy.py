@@ -39,6 +39,7 @@ class GrpsProjectDeployer(object):
         parser_deploy.add_argument('--timeout', type=int, help='server start timeout, default is 300s', default=300)
         parser_deploy.add_argument('--mpi_np', type=int, help='mpi process count, default is 1 and will not use mpi.',
                                    default=1)
+        parser_deploy.add_argument('--no_logging', action='store_true', help='not trace logs after start.')
         parser_deploy.add_argument('mar_path', type=str, help='model server archive path')
         parser_deploy.set_defaults(func=self.deploy)  # Set default function.
 
@@ -473,5 +474,7 @@ class GrpsProjectDeployer(object):
         # Show server logs.
         # print('\n\n>>>> Showing server logs, stop showing by Ctrl+C.')
         signal.signal(signal.SIGINT, signal.SIG_DFL)
+        if args.no_logging:
+            return 0
         os.system('grpst logs {}'.format(args.name))
         return 0

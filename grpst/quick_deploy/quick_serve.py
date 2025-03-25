@@ -82,6 +82,7 @@ class GrpsQuickServe(object):
                                    help='project will be archived to this path, default is empty and will not archive',
                                    default='')
         parser_deploy.add_argument('--timeout', type=int, help='server start timeout, default is 300s', default=300)
+        parser_deploy.add_argument('--no_logging', action='store_true', help='not trace logs after start.')
         parser_deploy.set_defaults(func=self.tf_serve)  # Set default function.
 
         parser_deploy = subparsers.add_parser('torch_serve',
@@ -148,6 +149,7 @@ class GrpsQuickServe(object):
                                    help='project will be archived to this path, default is empty and will not archive',
                                    default='')
         parser_deploy.add_argument('--timeout', type=int, help='server start timeout, default is 300s', default=300)
+        parser_deploy.add_argument('--no_logging', action='store_true', help='not trace logs after start.')
         parser_deploy.set_defaults(func=self.torch_serve)  # Set default function.
 
         parser_deploy = subparsers.add_parser('trt_serve',
@@ -204,6 +206,7 @@ class GrpsQuickServe(object):
                                    help='project will be archived to this path, default is empty and will not archive',
                                    default='')
         parser_deploy.add_argument('--timeout', type=int, help='server start timeout, default is 300s', default=300)
+        parser_deploy.add_argument('--no_logging', action='store_true', help='not trace logs after start.')
         parser_deploy.set_defaults(func=self.trt_serve)  # Set default function.
 
     def __gen_conf(self, args, model_type, build_conf_path, run_conf_path):
@@ -729,6 +732,8 @@ class GrpsQuickServe(object):
         # Show server logs.
         # print('\n\n>>>> Showing server logs, stop showing by Ctrl+C.')
         signal.signal(signal.SIGINT, signal.SIG_DFL)
+        if args.no_logging:
+            return 0
         os.system('grpst logs {}'.format(args.name))
         return 0
 
@@ -754,6 +759,8 @@ class GrpsQuickServe(object):
         # Show server logs.
         # print('\n\n>>>> Showing server logs, stop showing by Ctrl+C.')
         signal.signal(signal.SIGINT, signal.SIG_DFL)
+        if args.no_logging:
+            return 0
         os.system('grpst logs {}'.format(args.name))
         return 0
 
@@ -779,5 +786,7 @@ class GrpsQuickServe(object):
         # Show server logs.
         # print('\n\n>>>> Showing server logs, stop showing by Ctrl+C.')
         signal.signal(signal.SIGINT, signal.SIG_DFL)
+        if args.no_logging:
+            return 0
         os.system('grpst logs {}'.format(args.name))
         return 0

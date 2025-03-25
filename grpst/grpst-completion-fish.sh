@@ -33,6 +33,7 @@ complete -c grpst -n "__fish_seen_subcommand_from start" -a "--name" -d "server 
 complete -c grpst -n "__fish_seen_subcommand_from start" -a "--inference_conf" -d "inference config path"
 complete -c grpst -n "__fish_seen_subcommand_from start" -a "--server_conf" -d "server config path"
 complete -c grpst -n "__fish_seen_subcommand_from start" -a "--timeout" -d "timeout"
+complete -c grpst -n "__fish_seen_subcommand_from start" -a "--no_logging" -d "not trace logs after start"
 complete -c grpst -n "__fish_seen_subcommand_from start" -a "--mpi_np" -d "mpi process count"
 
 # Add argument completion for tf_serve subcommands
@@ -55,6 +56,7 @@ complete -c grpst -n "__fish_seen_subcommand_from tf_serve" -a "--log_dir" -d "l
 complete -c grpst -n "__fish_seen_subcommand_from tf_serve" -a "--log_backup_count" -d "log backup count"
 complete -c grpst -n "__fish_seen_subcommand_from tf_serve" -a "--output_path" -d "archive to mar output path"
 complete -c grpst -n "__fish_seen_subcommand_from tf_serve" -a "--timeout" -d "timeout"
+complete -c grpst -n "__fish_seen_subcommand_from tf_serve" -a "--no_logging" -d "not trace logs after start"
 
 # Add argument completion for torch_serve subcommands
 complete -c grpst -n "__fish_seen_subcommand_from torch_serve" -a "--help" -d "show help"
@@ -79,6 +81,7 @@ complete -c grpst -n "__fish_seen_subcommand_from torch_serve" -a "--log_dir" -d
 complete -c grpst -n "__fish_seen_subcommand_from torch_serve" -a "--log_backup_count" -d "log backup count"
 complete -c grpst -n "__fish_seen_subcommand_from torch_serve" -a "--output_path" -d "archive to mar output path"
 complete -c grpst -n "__fish_seen_subcommand_from torch_serve" -a "--timeout" -d "timeout"
+complete -c grpst -n "__fish_seen_subcommand_from torch_serve" -a "--no_logging" -d "not trace logs after start"
 
 # Add argument completion for trt_serve subcommands
 complete -c grpst -n "__fish_seen_subcommand_from trt_serve" -a "--help" -d "show help"
@@ -100,6 +103,7 @@ complete -c grpst -n "__fish_seen_subcommand_from trt_serve" -a "--log_dir" -d "
 complete -c grpst -n "__fish_seen_subcommand_from trt_serve" -a "--log_backup_count" -d "log backup count"
 complete -c grpst -n "__fish_seen_subcommand_from trt_serve" -a "--output_path" -d "archive to mar output path"
 complete -c grpst -n "__fish_seen_subcommand_from trt_serve" -a "--timeout" -d "timeout"
+complete -c grpst -n "__fish_seen_subcommand_from trt_serve" -a "--no_logging" -d "not trace logs after start"
 
 # Add argument completion for stop subcommands
 complete -c grpst -n "__fish_seen_subcommand_from stop" -a "--help" -d "show help"

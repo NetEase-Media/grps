@@ -108,6 +108,15 @@ RUN wget https://github.com/xtensor-stack/xtl/archive/refs/tags/0.7.7.tar.gz && 
     cd ../../ && \
     rm -rf xtensor-0.25.0 0.25.0.tar.gz
 
+# install cityhash.
+RUN git clone https://github.com/google/cityhash.git && \
+    cd cityhash && \
+    ./configure && \
+    make -j12 && \
+    make install && \
+    cd - && \
+    rm -rf cityhash
+
 # setup timezone
 ENV TZ=Asia/Shanghai
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone

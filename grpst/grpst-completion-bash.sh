@@ -21,16 +21,16 @@ _grpst_complete() {
                 COMPREPLY=( $(compgen -d -f  -W "--help -h --skip_unittest --output_path" -- $curr_arg) )
                 ;;
             start)
-                COMPREPLY=( $(compgen -d -f  -W "--help -h --name --inference_conf --server_conf --timeout --mpi_np" -- $curr_arg) )
+                COMPREPLY=( $(compgen -d -f  -W "--help -h --name --inference_conf --server_conf --timeout --mpi_np --no_logging" -- $curr_arg) )
                 ;;
             tf_serve)
-                COMPREPLY=( $(compgen -d -f  -W "--help -h --name --interface_framework --port --customized_predict_http_path --device --batching_type --max_batch_size --batch_timeout_us --max_connections --max_concurrency --gpu_devices_idx --gpu_mem_limit_mib --customized_op_paths --log_dir --log_backup_count --timeout --output_path" -- $curr_arg) )
+                COMPREPLY=( $(compgen -d -f  -W "--help -h --name --interface_framework --port --customized_predict_http_path --device --batching_type --max_batch_size --batch_timeout_us --max_connections --max_concurrency --gpu_devices_idx --gpu_mem_limit_mib --customized_op_paths --log_dir --log_backup_count --timeout --output_path --no_logging" -- $curr_arg) )
                 ;;
             torch_serve)
-                COMPREPLY=( $(compgen -d -f  -W "--help -h --name --interface_framework --port --customized_predict_http_path --device --inp_device --batching_type --max_batch_size --batch_timeout_us --max_connections --max_concurrency --gpu_devices_idx --gpu_mem_limit_mib --gpu_mem_gc_enable --gpu_mem_gc_interval --customized_op_paths --log_dir --log_backup_count --timeout --output_path" -- $curr_arg) )
+                COMPREPLY=( $(compgen -d -f  -W "--help -h --name --interface_framework --port --customized_predict_http_path --device --inp_device --batching_type --max_batch_size --batch_timeout_us --max_connections --max_concurrency --gpu_devices_idx --gpu_mem_limit_mib --gpu_mem_gc_enable --gpu_mem_gc_interval --customized_op_paths --log_dir --log_backup_count --timeout --output_path --no_logging" -- $curr_arg) )
                 ;;
             trt_serve)
-                COMPREPLY=( $(compgen -d -f  -W "--help -h --name --interface_framework --port --customized_predict_http_path --device --streams --batching_type --max_batch_size --batch_timeout_us --max_connections --max_concurrency --gpu_devices_idx --customized_op_paths --log_dir --log_backup_count --timeout --output_path" -- $curr_arg) )
+                COMPREPLY=( $(compgen -d -f  -W "--help -h --name --interface_framework --port --customized_predict_http_path --device --streams --batching_type --max_batch_size --batch_timeout_us --max_connections --max_concurrency --gpu_devices_idx --customized_op_paths --log_dir --log_backup_count --timeout --output_path --no_logging" -- $curr_arg) )
                 ;;
             stop)
                 COMPREPLY=( $(compgen -d -f  -W "--help -h" -- $curr_arg) )
