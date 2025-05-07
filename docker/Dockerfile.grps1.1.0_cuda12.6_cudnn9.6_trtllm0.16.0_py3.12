@@ -145,4 +145,10 @@ RUN cd /tmp/grps && \
 ENV GRPST_HOME=/usr/local/grpst
 ENV PATH=$PATH:$GRPST_HOME
 
+# update tensorrt-llm to support more models
+RUN git clone -b v0.16.0_dev --single-branch https://github.com/NetEase-Media/TensorRT-LLM.git && \
+    cp -r TensorRT-LLM/tensorrt_llm/models /usr/local/lib/python3.12/dist-packages/tensorrt_llm/ && \
+    rm -rf TensorRT-LLM
+
 RUN echo "figlet grps | /usr/games/lolcat -p 1" >> /etc/bash.bashrc
+
